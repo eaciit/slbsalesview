@@ -369,7 +369,7 @@ dsa.constructDataChartDailySalesInsights = function (data) {
 
         resolve({
             rows: flatDataSorted,
-            max: max * 1.5
+            max: max
         })
     })
 }
