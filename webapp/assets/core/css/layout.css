@@ -224,3 +224,12 @@ body:not(.page-login) .layout-container .layout-content {
 .navigation label + div {
     margin-bottom: 4px;
 }
+
+.panel-heading {
+    position: relative;
+}
+.panel-heading .btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}

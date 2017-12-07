@@ -220,36 +220,44 @@ dsa.renderChartDailySalesAnalysis = function (data) {
     return new Promise(function (resolve, reject) {
 
         var series = [{
-            name: 'Oct Forecast',
+            name: 'Sept Forecast',
             field: 'forecast',
-        }, {
-            name: 'Aug Actual',
-            field: 'actualAugust',
         }, {
             name: 'Sept Actual',
             field: 'actualSeptember',
-        }, {
-            name: 'Oct Actual',
-            field: 'actualOctober',
         }]
+
+        // var series = [{
+        //     name: 'Oct Forecast',
+        //     field: 'forecast',
+        // }, {
+        //     name: 'Aug Actual',
+        //     field: 'actualAugust',
+        // }, {
+        //     name: 'Sept Actual',
+        //     field: 'actualSeptember',
+        // }, {
+        //     name: 'Oct Actual',
+        //     field: 'actualOctober',
+        // }]
         
-        if (dsa.monthMode() == 'august') {
-            series = [{
-                name: 'Aug Forecast',
-                field: 'forecast',
-            }, {
-                name: 'Aug Actual',
-                field: 'actualAugust',
-            }]
-        } else if (dsa.monthMode() == 'september') {
-            series = [{
-                name: 'Sept Forecast',
-                field: 'forecast',
-            }, {
-                name: 'Sept Actual',
-                field: 'actualSeptember',
-            }]
-        }
+        // if (dsa.monthMode() == 'august') {
+        //     series = [{
+        //         name: 'Aug Forecast',
+        //         field: 'forecast',
+        //     }, {
+        //         name: 'Aug Actual',
+        //         field: 'actualAugust',
+        //     }]
+        // } else if (dsa.monthMode() == 'september') {
+        //     series = [{
+        //         name: 'Sept Forecast',
+        //         field: 'forecast',
+        //     }, {
+        //         name: 'Sept Actual',
+        //         field: 'actualSeptember',
+        //     }]
+        // }
 
         var config = {
             chartArea: {
@@ -492,6 +500,15 @@ dsa.refreshChartDailySalesInsights = function () {
     })
 }
 
+dsa.toggleFilter = function (obj) {
+    var $target = $(obj).closest('.panel').find('.navigation')
+    if ($target.is(':visible')) {
+        $target.hide()
+    } else {
+        $target.show()
+    }
+}
+
 $(function () {
     newPromise()
 
@@ -500,6 +517,7 @@ $(function () {
     })
     .then(function () {
         dsa.monthMode('october')
+        $('.pre-render').hide().removeClass('pre-render')
     })
     .catch(function (errorMessage) {
         swal('Error!', errorMessage, 'error')

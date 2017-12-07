@@ -6,3 +6,9 @@
 .nav-tabs {
     margin-bottom: 10px;
 }
+
+.pre-render {
+    visibility: hidden;
+    height: 0px;
+    overflow: hidden;
+}

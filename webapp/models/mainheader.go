@@ -169,11 +169,12 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 		monthInt = 8
 	}
 
-	filter["forecastmonth"] = month
-	filter["salesordertype"] = "Forecast"
-
 	pipeForecast := []tk.M{
-		tk.M{"$match": filter},
+		// tk.M{"$match": filter}, // disable filter
+		tk.M{"$match": tk.M{
+			"forecastmonth":  month,
+			"salesordertype": "Forecast",
+		}},
 		tk.M{"$group": tk.M{
 			"_id": nil,
 			"forecast": tk.M{
@@ -322,9 +323,9 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 	// ============== aggr forecast data
 
 	pipeAggrForecast := []tk.M{}
-	if len(filter) > 0 {
-		pipeAggrForecast = append(pipeAggrForecast, tk.M{"$match": filter})
-	}
+	// if len(filter) > 0 {
+	// 	pipeAggrForecast = append(pipeAggrForecast, tk.M{"$match": filter})
+	// }
 	pipeAggrForecast = append(pipeAggrForecast, tk.M{
 		"$project": tk.M{
 			"forecastmonth":  1,
