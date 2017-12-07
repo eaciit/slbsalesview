@@ -21,7 +21,7 @@
     margin-top: 80px;
 }
 .right-side .logo img {
-    height: 100px;
+    width: 100%;
 }
 .right-side form {
     width: 240px;

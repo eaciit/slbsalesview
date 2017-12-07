@@ -7,9 +7,9 @@
     "loginExpiration": 72000,
     "port": 9035,
     "uploadPath": "./../assets/main/images/upload",
-    "landingPage": "/dashboard/index",
+    "landingPage": "/dailysalesanalysis/index",
     "ssl": false,
     "sslPrivateKeyPath": "./../privatekey.pem",
     "sslCertificatePath": "./../certificate.pem",
-    "isDevMode": "true"
+    "isDevMode": "false"
 }
