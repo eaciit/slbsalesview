@@ -14,6 +14,9 @@ type DailySalesAnalysisPayload struct {
 	SalesOrg               []string
 	SubGeoMarket           []string
 	SubProductLine         []string
+	SalesOrderType         []string
+	RejectionStatus        []string
+	RequiredDeliveryDate   string
 }
 
 type MainHeaderModel struct {
@@ -54,10 +57,24 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 	if len(payload.SubProductLine) > 0 {
 		filter["subproductline"] = tk.M{"$in": payload.SubProductLine}
 	}
+	if len(payload.SalesOrderType) > 0 {
+		filter["salesordertype"] = tk.M{"$in": payload.SalesOrderType}
+	}
+	if len(payload.RejectionStatus) > 0 {
+		filter["rejectionstatus"] = tk.M{"$in": payload.RejectionStatus}
+	}
+	if payload.RequiredDeliveryDate != "" {
+		date, err := time.Parse("20060102", payload.RequiredDeliveryDate)
+		if err != nil {
+			return nil, 0, err
+		}
 
-	whereClause := ""
+		filter["requireddeliverydate"] = date
+	}
+
+	whereClauseActual := ""
 	if len(filter) > 0 {
-		whereClause = `{ "$match": ` + tk.JsonString(filter) + ` },`
+		whereClauseActual = `{ "$match": ` + tk.JsonString(filter) + ` },`
 	}
 
 	// =========== actual
@@ -65,7 +82,7 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 	pipeActual, err := DeserializeArray(`
         [
 
-        ` + whereClause + `
+        ` + whereClauseActual + `
 
         {
             "$group": {
@@ -102,6 +119,8 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 		return nil, 0, err
 	}
 
+	// tk.Println("----> query actual", tk.JsonString(pipeActual))
+
 	csr, err := Conn.NewQuery().
 		Command("pipe", pipeActual).
 		From(NewMainHeaderModel().TableName()).
@@ -124,11 +143,12 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 	month := "September" // "October"
 	monthInt := 9        // 10
 
+	filter["forecastmonth"] = month
+	filter["salesordertype"] = "Forecast"
+
 	pipeForecast, err := DeserializeArray(`
-        [{
-            "$match": {
-                "forecastmonth": "` + month + `"
-            }
+        [{ 
+            "$match": ` + tk.JsonString(filter) + ` 
         }, {
             "$group": {
                 "_id": null,
@@ -141,6 +161,8 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 	if err != nil {
 		return nil, 0, err
 	}
+
+	// tk.Println("----> query actual", tk.JsonString(pipeActual))
 
 	csr, err = Conn.NewQuery().
 		Command("pipe", pipeForecast).

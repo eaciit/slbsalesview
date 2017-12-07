@@ -90,6 +90,37 @@
                         </div>
 
                         <div class="clearfix"></div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Sales Order Type</label>
+                            <div>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterSalesOrderType, value: dsa.filterSalesOrderTypeSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Rejection Status</label>
+                            <div>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterRejectionStatus, value: dsa.filterRejectionStatusSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Rejection Status</label>
+                            <div>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterRejectionStatus, value: dsa.filterRejectionStatusSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Requested Delivery Date</label>
+                            <div>
+                                <input data-bind="kendoDatePicker: { value: dsa.filterRequiredDeliveryDateSelected, change: dsa.refreshChartDailySalesAnalysis }" style="width: 100%;"/>
+                            </div>
+                        </div>
+                        
+
+                        <div class="clearfix"></div>
                     </div>
                 </div>
 

@@ -122,6 +122,16 @@ func (c *DailySalesAnalysisController) GetDataMaster(k *knot.WebContext) interfa
 		return c.SetResultError(err.Error(), nil)
 	}
 
+	masterSalesOrderType, err := models.GetDataMasterByField("salesordertype")
+	if err != nil {
+		return c.SetResultError(err.Error(), nil)
+	}
+
+	masterRejectionStatus, err := models.GetDataMasterByField("rejectionstatus")
+	if err != nil {
+		return c.SetResultError(err.Error(), nil)
+	}
+
 	return c.SetResultOK(struct {
 		CreatedBy              interface{}
 		GeoMarket              interface{}
@@ -131,6 +141,8 @@ func (c *DailySalesAnalysisController) GetDataMaster(k *knot.WebContext) interfa
 		SalesOrg               interface{}
 		SubGeoMarket           interface{}
 		SubProductLine         interface{}
+		SalesOrderType         interface{}
+		RejectionStatus        interface{}
 	}{
 		masterCreatedBy,
 		masterGeoMarket,
@@ -140,5 +152,7 @@ func (c *DailySalesAnalysisController) GetDataMaster(k *knot.WebContext) interfa
 		masterSalesOrg,
 		masterSubGeoMarket,
 		masterSubProductLine,
+		masterSalesOrderType,
+		masterRejectionStatus,
 	})
 }

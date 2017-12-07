@@ -9,6 +9,8 @@ dsa.masterProfitCenter = ko.observableArray([])
 dsa.masterSalesOrg = ko.observableArray([])
 dsa.masterSubGeoMarket = ko.observableArray([])
 dsa.masterSubProductLine = ko.observableArray([])
+dsa.masterSalesOrderType = ko.observableArray([])
+dsa.masterRejectionStatus = ko.observableArray([])
 
 dsa.filterCreatedBySelected = ko.observableArray([])
 dsa.filterGeoMarketSelected = ko.observableArray([])
@@ -18,6 +20,9 @@ dsa.filterProfitCenterSelected = ko.observableArray([])
 dsa.filterSalesOrgSelected = ko.observableArray([])
 dsa.filterSubGeoMarketSelected = ko.observableArray([])
 dsa.filterSubProductLineSelected = ko.observableArray([])
+dsa.filterSalesOrderTypeSelected = ko.observableArray([])
+dsa.filterRejectionStatusSelected = ko.observableArray([])
+dsa.filterRequiredDeliveryDateSelected = ko.observable('')
 
 dsa.refreshChartDailySalesAnalysis = function () {
     return newPromise()
@@ -56,6 +61,8 @@ dsa.loadDataMaster = function () {
             dsa.masterSalesOrg(res.Data.SalesOrg.map(function (d) { return d._id }))
             dsa.masterSubGeoMarket(res.Data.SubGeoMarket.map(function (d) { return d._id }))
             dsa.masterSubProductLine(res.Data.SubProductLine.map(function (d) { return d._id }))
+            dsa.masterSalesOrderType(res.Data.SalesOrderType.map(function (d) { return d._id }))
+            dsa.masterRejectionStatus(res.Data.RejectionStatus.map(function (d) { return d._id }))
             resolve()
         }, function (res) {
             reject(xhr.responseText)
@@ -65,6 +72,10 @@ dsa.loadDataMaster = function () {
 
 dsa.loadDataChartDailySalesAnalysis = function () {
     return new Promise(function (resolve, reject) {
+        var date = ''
+        if (dsa.filterRequiredDeliveryDateSelected() !== '') {
+            date = moment(dsa.filterRequiredDeliveryDateSelected()).format('YYYYMMDD')
+        }
         var url = "/DailySalesAnalysis/GetDataForLineChartForecastVsActual"
         var param = {
             CreatedBy: dsa.filterCreatedBySelected(),
@@ -74,7 +85,10 @@ dsa.loadDataChartDailySalesAnalysis = function () {
             ProfitCenter: dsa.filterProfitCenterSelected(),
             SalesOrg: dsa.filterSalesOrgSelected(),
             SubGeoMarket: dsa.filterSubGeoMarketSelected(),
-            SubProductLine: dsa.filterSubProductLineSelected()
+            SubProductLine: dsa.filterSubProductLineSelected(),
+            SalesOrderType: dsa.filterSalesOrderTypeSelected(),
+            RejectionStatus: dsa.filterRejectionStatusSelected(),
+            RequiredDeliveryDate: date
         }
 
         ajaxPost(url, param, function (res) {

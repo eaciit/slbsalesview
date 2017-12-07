@@ -1,4 +1,4 @@
-var fields = ["salesorg", "geomarket", "subgeomarket", "performingorganization", "subproductline", "createdby"]
+var fields = ["salesorg", "geomarket", "subgeomarket", "performingorganization", "subproductline", "createdby", 'rejectionstatus', 'salesordertype']
 fields.forEach(function (field) {
     db.getCollection('rawmainheader').aggregate([
         {"$group": {"_id":"$" + field}},
