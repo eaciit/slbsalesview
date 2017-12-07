@@ -75,7 +75,7 @@ dsa.monthMode.subscribe(function (newValue) {
         case 'august': 
             dsa.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
             dsa.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
-            dsa.filterRequiredDeliveryDateStart(moment('2017-06-26').toDate())
+            dsa.filterRequiredDeliveryDateStart(moment('2017-07-26').toDate())
             dsa.filterRequiredDeliveryDateFinish(moment('2017-08-31').toDate())
         break
     }
