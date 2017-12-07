@@ -156,10 +156,8 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 
 	switch payload.MonthMode {
 	case "october":
-		// month = "October"
-		// monthInt = 10
-		month = "September"
-		monthInt = 9
+		month = "October"
+		monthInt = 10
 	case "september":
 		month = "September"
 		monthInt = 9
@@ -215,6 +213,16 @@ func GetDataDailySalesInsight(group, month string) ([]tk.M, []tk.M, []tk.M, erro
 
 	// ============== aggr actual data
 
+	monthInt := "10"
+	switch month {
+	case "october":
+		monthInt = "10"
+	case "september":
+		monthInt = "09"
+	case "august":
+		monthInt = "08"
+	}
+
 	pipeAggrActual, err := DeserializeArray(`
         [{
             "$project": {
@@ -230,9 +238,7 @@ func GetDataDailySalesInsight(group, month string) ([]tk.M, []tk.M, []tk.M, erro
             }
         }, {
             "$match": {
-                "month": {
-                    "$in": ["08", "09"]
-                }
+                "month": "` + monthInt + `"
             }
         }, {
             "$group": {
@@ -272,12 +278,7 @@ func GetDataDailySalesInsight(group, month string) ([]tk.M, []tk.M, []tk.M, erro
 	pipeAggrForecast, err := DeserializeArray(`
         [{
             "$project": {
-                "month": {
-                    "$dateToString": {
-                        "format": "%m",
-                        "date": "$salesorderdate"
-                    }
-                },
+                "forecastmonth": 1,
                 "subgeomarket": 1,
                 "subproductline": 1,
                 "salesordertype": 1,
@@ -286,7 +287,7 @@ func GetDataDailySalesInsight(group, month string) ([]tk.M, []tk.M, []tk.M, erro
         }, {
             "$match": {
                 "salesordertype": "Forecast",
-                "month": "` + month + `"
+                "forecastmonth": "` + month + `"
             }
         }, {
             "$group": {
@@ -297,7 +298,7 @@ func GetDataDailySalesInsight(group, month string) ([]tk.M, []tk.M, []tk.M, erro
             }
         }]
     `)
-	tk.Println("=-====", tk.JsonString(pipeAggrForecast))
+
 	if err != nil {
 		return nil, nil, nil, err
 	}

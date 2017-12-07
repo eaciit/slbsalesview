@@ -25,10 +25,43 @@ dsa.filterRejectionStatusSelected = ko.observableArray([])
 dsa.filterRequiredDeliveryDateStart = ko.observable('')
 dsa.filterRequiredDeliveryDateFinish = ko.observable('')
 
-dsa.monthMode = ko.observable('october')
-dsa.monthMode.subscribe(function () {
-    newPromise()
+dsa.monthMode = ko.observable('')
+dsa.monthMode.subscribe(function (newValue) {
+        dsa.filterCreatedBySelected([])
+        dsa.filterGeoMarketSelected([])
+        dsa.filterMaterialGroup1Selected([])
+        dsa.filterPerformingOrganizationSelected([])
+        dsa.filterProfitCenterSelected([])
+        dsa.filterSalesOrgSelected([])
+        dsa.filterSubGeoMarketSelected([])
+        dsa.filterSubProductLineSelected([])
+        dsa.filterSalesOrderTypeSelected([])
+        dsa.filterRejectionStatusSelected([])
+        dsa.filterRequiredDeliveryDateStart('')
+        dsa.filterRequiredDeliveryDateFinish('')
 
+    switch (newValue) {
+        case 'october': 
+            dsa.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
+            dsa.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
+            dsa.filterRequiredDeliveryDateStart(moment('2017-10-01').toDate())
+            dsa.filterRequiredDeliveryDateFinish(moment('2017-10-31').toDate())
+        break
+        case 'september': 
+            dsa.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
+            dsa.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
+            dsa.filterRequiredDeliveryDateStart(moment('2017-09-01').toDate())
+            dsa.filterRequiredDeliveryDateFinish(moment('2017-09-30').toDate())
+        break
+        case 'august': 
+            dsa.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
+            dsa.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
+            dsa.filterRequiredDeliveryDateStart(moment('2017-06-26').toDate())
+            dsa.filterRequiredDeliveryDateFinish(moment('2017-08-31').toDate())
+        break
+    }
+
+    newPromise()
     .then(function () {
         return dsa.refreshChartDailySalesAnalysis()
     })
@@ -274,11 +307,11 @@ dsa.renderChartDailySalesAnalysis = function (data) {
 
 dsa.loadDataChartDailySalesInsights = function () {
     return new Promise(function (resolve, reject) {
-        var month = "10"
+        var month = "October"
         if (dsa.monthMode() == 'august') {
-            month = "09"
+            month = "August"
         } else if (dsa.monthMode() == 'september') {
-            month = "08"
+            month = "September"
         }
 
         var url = "/DailySalesAnalysis/GetDataForTornadoChartAugVsOct"
@@ -303,64 +336,36 @@ dsa.loadDataChartDailySalesInsights = function () {
 dsa.constructDataChartDailySalesInsights = function (data) {
     return new Promise(function (resolve, reject) {
 
-        var flatData = []
+        var flatData = data.Master.filter(function (d) {
+            return d._id != 0
+        }).map(function (d) {
+            d.actualValue = 0
+            d.forecastValue = 0
+            d.group = d._id
 
-        if (dsa.monthMode() == 'october') {
-            flatData = data.Master.filter(function (d) {
-                return d._id != 0
-            }).map(function (d) {
-                d.augustValue = 0
-                d.septemberValue = 0
-                d.group = d._id
-
-                var dataFoundAugust = data.DetailActual.find(function (e) {
-                    return e._id.group == d.group && e._id.month == "08"
-                })
-                if (typeof dataFoundAugust !== 'undefined') {
-                    d.augustValue = dataFoundAugust.actual
-                }
-
-                var dataFoundSeptember = data.DetailActual.find(function (e) {
-                    return e._id.group == d.group && e._id.month == "09"
-                })
-                if (typeof dataFoundSeptember !== 'undefined') {
-                    d.septemberValue = dataFoundSeptember.actual
-                }
-
-                d.difference = d.septemberValue - d.augustValue
-
-                return d
+            var dataFoundActual = data.DetailActual.find(function (e) {
+                return e._id.group == d.group
             })
-        } else {
-            flatData = data.Master.filter(function (d) {
-                return d._id != 0
-            }).map(function (d) {
-                d.actualValue = 0
-                d.forecastValue = 0
-                d.group = d._id
+            if (typeof dataFoundActual !== 'undefined') {
+                d.actualValue = dataFoundActual.actual
+            }
 
-                var dataFoundActual = data.DetailActual.find(function (e) {
-                    return e._id.group == d.group
-                })
-                if (typeof dataFoundActual !== 'undefined') {
-                    d.actualValue = dataFoundActual.actual
-                }
-
-                var dataFoundForecast = data.DetailForecast.find(function (e) {
-                    return e._id.group == d.group && e._id.month == "09"
-                })
-                if (typeof dataFoundForecast !== 'undefined') {
-                    d.forecastValue = dataFoundForecast.forecast
-                }
-
-                d.difference = d.actualValue - d.forecastValue
-
-                return d
+            var dataFoundForecast = data.DetailForecast.find(function (e) {
+                return e._id == d.group
             })
-        }
+            if (typeof dataFoundForecast !== 'undefined') {
+                d.forecastValue = dataFoundForecast.forecast
+            }
+
+            d.difference = d.actualValue - d.forecastValue
+
+            return d
+        })
 
         var flatDataSorted = _.orderBy(flatData, 'difference', 'desc')
-        var max = _.maxBy(flatDataSorted, 'difference').difference
+        var max = Math.abs(_.maxBy(flatDataSorted, function (d) {
+            return Math.abs(d.difference)
+        }).difference)
 
         resolve({
             rows: flatDataSorted,
@@ -376,7 +381,7 @@ dsa.renderChartDailySalesInsights = function (data) {
             chartArea: {
                 background: 'transparent',
                 margin: {
-                    left: 20
+                    left: 45
                 }
             },
             dataSource: {
@@ -453,6 +458,8 @@ dsa.renderChartDailySalesInsights = function (data) {
             }
         }
 
+        console.log('data', data.max)
+
         $('.chart-insights').replaceWith('<div class="chart-insights"></div>')
         $('.chart-insights').kendoChart(config)
         resolve()
@@ -490,10 +497,7 @@ $(function () {
         return dsa.loadDataMaster()
     })
     .then(function () {
-        return dsa.refreshChartDailySalesAnalysis()
-    })
-    .then(function () {
-        return dsa.refreshChartDailySalesInsights()
+        dsa.monthMode('october')
     })
     .catch(function (errorMessage) {
         swal('Error!', errorMessage, 'error')
