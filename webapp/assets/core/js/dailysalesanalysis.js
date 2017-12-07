@@ -220,12 +220,29 @@ dsa.renderChartDailySalesAnalysis = function (data) {
     return new Promise(function (resolve, reject) {
 
         var series = [{
-            name: 'Sept Forecast',
+            name: 'Oct Forecast',
             field: 'forecast',
         }, {
-            name: 'Sept Actual',
-            field: 'actualSeptember',
+            name: 'Oct Actual',
+            field: 'actualOctober',
         }]
+        if (dsa.monthMode() == 'august') {
+            series = [{
+                name: 'Aug Forecast',
+                field: 'forecast',
+            }, {
+                name: 'Aug Actual',
+                field: 'actualAugust',
+            }]
+        } else if (dsa.monthMode() == 'september') {
+            series = [{
+                name: 'Sept Forecast',
+                field: 'forecast',
+            }, {
+                name: 'Sept Actual',
+                field: 'actualSeptember',
+            }]
+        }
 
         // var series = [{
         //     name: 'Oct Forecast',
@@ -241,23 +258,6 @@ dsa.renderChartDailySalesAnalysis = function (data) {
         //     field: 'actualOctober',
         // }]
         
-        // if (dsa.monthMode() == 'august') {
-        //     series = [{
-        //         name: 'Aug Forecast',
-        //         field: 'forecast',
-        //     }, {
-        //         name: 'Aug Actual',
-        //         field: 'actualAugust',
-        //     }]
-        // } else if (dsa.monthMode() == 'september') {
-        //     series = [{
-        //         name: 'Sept Forecast',
-        //         field: 'forecast',
-        //     }, {
-        //         name: 'Sept Actual',
-        //         field: 'actualSeptember',
-        //     }]
-        // }
 
         var config = {
             chartArea: {
@@ -391,7 +391,7 @@ dsa.renderChartDailySalesInsights = function (data) {
             chartArea: {
                 background: 'transparent',
                 margin: {
-                    left: 45
+                    left: 35
                 }
             },
             dataSource: {
@@ -425,9 +425,9 @@ dsa.renderChartDailySalesInsights = function (data) {
                     font: '10px Arial, Helvetica, sans-serif',
                     template: function (d) {
                         var text = kendo.toString(d.value / 1000000, 'n0') + 'M'
-                        if (text.indexOf('-') > -1) {
-                            return text
-                        }
+                        // if (text.indexOf('-') > -1) {
+                        //     return text
+                        // }
 
                         return '$' + text
                     }
