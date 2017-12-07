@@ -1,10 +1,46 @@
 var dsa = {}
 viewModel.dailySalesAnalysis = dsa
 
+dsa.masterCreatedBy = ko.observableArray([])
+dsa.masterGeoMarket = ko.observableArray([])
+dsa.masterMaterialGroup1 = ko.observableArray([])
+dsa.masterPerformingOrganization = ko.observableArray([])
+dsa.masterProfitCenter = ko.observableArray([])
+dsa.masterSalesOrg = ko.observableArray([])
+dsa.masterSubGeoMarket = ko.observableArray([])
+dsa.masterSubProductLine = ko.observableArray([])
+
+dsa.filterCreatedBySelected = ko.observableArray([])
+dsa.filterGeoMarketSelected = ko.observableArray([])
+dsa.filterMaterialGroup1Selected = ko.observableArray([])
+dsa.filterPerformingOrganizationSelected = ko.observableArray([])
+dsa.filterProfitCenterSelected = ko.observableArray([])
+dsa.filterSalesOrgSelected = ko.observableArray([])
+dsa.filterSubGeoMarketSelected = ko.observableArray([])
+dsa.filterSubProductLineSelected = ko.observableArray([])
+
+dsa.refreshChartDailySalesAnalysis = function () {
+    return newPromise()
+
+    .then(function () {
+        return dsa.loadDataChartDailySalesAnalysis()
+    })
+    .then(function (data) {
+        return dsa.constructDataChartDailySalesAnalysis(data)
+    })
+    .then(function (data) {
+        return dsa.renderChartDailySalesAnalysis(data)
+    })
+
+    .catch(function (errorMessage) {
+        swal('Error!', errorMessage, 'error')
+    })
+}
+
 dsa.loadDataMaster = function () {
     return new Promise(function (resolve, reject) {
         var url = '/DailySalesAnalysis/GetDataMaster'
-        var param = {}
+        var param = { }
 
         ajaxPost(url, param, function (res) {
             if (res.Status !== "OK") {
@@ -12,6 +48,14 @@ dsa.loadDataMaster = function () {
                 return
             }
 
+            dsa.masterCreatedBy(res.Data.CreatedBy.map(function (d) { return d._id }))
+            dsa.masterGeoMarket(res.Data.GeoMarket.map(function (d) { return d._id }))
+            dsa.masterMaterialGroup1(res.Data.MaterialGroup1.map(function (d) { return d._id }))
+            dsa.masterPerformingOrganization(res.Data.PerformingOrganization.map(function (d) { return d._id }))
+            dsa.masterProfitCenter(res.Data.ProfitCenter.map(function (d) { return d._id }))
+            dsa.masterSalesOrg(res.Data.SalesOrg.map(function (d) { return d._id }))
+            dsa.masterSubGeoMarket(res.Data.SubGeoMarket.map(function (d) { return d._id }))
+            dsa.masterSubProductLine(res.Data.SubProductLine.map(function (d) { return d._id }))
             resolve()
         }, function (res) {
             reject(xhr.responseText)
@@ -22,7 +66,16 @@ dsa.loadDataMaster = function () {
 dsa.loadDataChartDailySalesAnalysis = function () {
     return new Promise(function (resolve, reject) {
         var url = "/DailySalesAnalysis/GetDataForLineChartForecastVsActual"
-        var param = {}
+        var param = {
+            CreatedBy: dsa.filterCreatedBySelected(),
+            GeoMarket: dsa.filterGeoMarketSelected(),
+            MaterialGroup1: dsa.filterMaterialGroup1Selected(),
+            PerformingOrganization: dsa.filterPerformingOrganizationSelected(),
+            ProfitCenter: dsa.filterProfitCenterSelected(),
+            SalesOrg: dsa.filterSalesOrgSelected(),
+            SubGeoMarket: dsa.filterSubGeoMarketSelected(),
+            SubProductLine: dsa.filterSubProductLineSelected()
+        }
 
         ajaxPost(url, param, function (res) {
             if (res.Status !== "OK") {
@@ -345,7 +398,7 @@ dsa.filterInsightGroup = ko.observableArray([
 ])
 dsa.filterInsightGroupSelected = ko.observable(dsa.filterInsightGroup()[0].value)
 dsa.refreshChartDailySalesInsights = function () {
-    newPromise()
+    return newPromise()
 
     .then(function () {
         return dsa.loadDataChartDailySalesInsights()
@@ -365,29 +418,15 @@ dsa.refreshChartDailySalesInsights = function () {
 $(function () {
     newPromise()
 
-    // .then(function () {
-    //     return dsa.loadDataMaster()
-    // })
     .then(function () {
-        return dsa.loadDataChartDailySalesAnalysis()
+        return dsa.loadDataMaster()
     })
-    .then(function (data) {
-        return dsa.constructDataChartDailySalesAnalysis(data)
-    })
-    .then(function (data) {
-        return dsa.renderChartDailySalesAnalysis(data)
-    })
-
     .then(function () {
-        return dsa.loadDataChartDailySalesInsights()
+        return dsa.refreshChartDailySalesAnalysis()
     })
-    .then(function (data) {
-        return dsa.constructDataChartDailySalesInsights(data)
+    .then(function () {
+        return dsa.refreshChartDailySalesInsights()
     })
-    .then(function (data) {
-        return dsa.renderChartDailySalesInsights(data)
-    })
-
     .catch(function (errorMessage) {
         swal('Error!', errorMessage, 'error')
     })

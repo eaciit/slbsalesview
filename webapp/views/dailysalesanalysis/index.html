@@ -34,28 +34,28 @@
                         <div class="col-md-3 no-padding-right">
                             <label>Sales Org</label>
                             <div>
-                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterSalesOrg, value: dsa.filterSalesOrgSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
                             </div>
                         </div>
 
                         <div class="col-md-3 no-padding-right">
                             <label>Geo Market</label>
                             <div>
-                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterGeoMarket, value: dsa.filterGeoMarketSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
                             </div>
                         </div>
 
                         <div class="col-md-3 no-padding-right">
                             <label>Sub Geo Market</label>
                             <div>
-                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterSubGeoMarket, value: dsa.filterSubGeoMarketSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
                             </div>
                         </div>
 
                         <div class="col-md-3 no-padding-right">
                             <label>Performing Orgs</label>
                             <div>
-                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterPerformingOrganization, value: dsa.filterPerformingOrganizationSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
                             </div>
                         </div>
 
@@ -64,28 +64,28 @@
                         <div class="col-md-3 no-padding-right">
                             <label>Profit Centres</label>
                             <div>
-                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterProfitCenter, value: dsa.filterProfitCenterSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
                             </div>
                         </div>
 
                         <div class="col-md-3 no-padding-right">
                             <label>Sub product line</label>
                             <div>
-                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterSubProductLine, value: dsa.filterSubProductLineSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
                             </div>
                         </div>
 
                         <div class="col-md-3 no-padding-right">
                             <label>Creator</label>
                             <div>
-                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterCreatedBy, value: dsa.filterCreatedBySelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
                             </div>
                         </div>
 
                         <div class="col-md-3 no-padding-right">
                             <label>Material Group</label>
                             <div>
-                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                                <select data-bind="kendoMultiSelect: { data: dsa.masterMaterialGroup1, value: dsa.filterMaterialGroup1Selected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
                             </div>
                         </div>
 

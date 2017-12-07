@@ -5,6 +5,17 @@ import (
 	"time"
 )
 
+type DailySalesAnalysisPayload struct {
+	CreatedBy              []string
+	GeoMarket              []string
+	MaterialGroup1         []string
+	PerformingOrganization []string
+	ProfitCenter           []int32
+	SalesOrg               []string
+	SubGeoMarket           []string
+	SubProductLine         []string
+}
+
 type MainHeaderModel struct {
 }
 
@@ -16,12 +27,47 @@ func NewMainHeaderModel() *MainHeaderModel {
 	return new(MainHeaderModel)
 }
 
-func GetDataDailySalesAnalysis(salesorg, geomarket, subgeomarket, performingorganization, PROFITCENTRES, subproductline, createdby, MATERIALGROUP []string) ([]tk.M, float64, error) {
+func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float64, error) {
+
+	filter := tk.M{}
+	if len(payload.CreatedBy) > 0 {
+		filter["createdby"] = tk.M{"$in": payload.CreatedBy}
+	}
+	if len(payload.GeoMarket) > 0 {
+		filter["geomarket"] = tk.M{"$in": payload.GeoMarket}
+	}
+	if len(payload.MaterialGroup1) > 0 {
+		filter["materialgroup1s"] = tk.M{"$in": payload.MaterialGroup1}
+	}
+	if len(payload.PerformingOrganization) > 0 {
+		filter["performingorganization"] = tk.M{"$in": payload.PerformingOrganization}
+	}
+	if len(payload.ProfitCenter) > 0 {
+		filter["profitcenters"] = tk.M{"$in": payload.ProfitCenter}
+	}
+	if len(payload.SalesOrg) > 0 {
+		filter["salesorg"] = tk.M{"$in": payload.SalesOrg}
+	}
+	if len(payload.SubGeoMarket) > 0 {
+		filter["subgeomarket"] = tk.M{"$in": payload.SubGeoMarket}
+	}
+	if len(payload.SubProductLine) > 0 {
+		filter["subproductline"] = tk.M{"$in": payload.SubProductLine}
+	}
+
+	whereClause := ""
+	if len(filter) > 0 {
+		whereClause = `{ "$match": ` + tk.JsonString(filter) + ` },`
+	}
 
 	// =========== actual
 
 	pipeActual, err := DeserializeArray(`
-        [{
+        [
+
+        ` + whereClause + `
+
+        {
             "$group": {
                 "_id": {
                     "date": "$acceptancedate",

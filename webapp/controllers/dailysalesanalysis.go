@@ -24,7 +24,13 @@ func (c *DailySalesAnalysisController) GetDataForLineChartForecastVsActual(k *kn
 		return nil
 	}
 
-	dataActual, dataForecast, err := models.GetDataDailySalesAnalysis([]string{}, []string{}, []string{}, []string{}, []string{}, []string{}, []string{}, []string{})
+	payload := new(models.DailySalesAnalysisPayload)
+	err := k.GetPayload(payload)
+	if err != nil {
+		return c.SetResultError(err.Error(), nil)
+	}
+
+	dataActual, dataForecast, err := models.GetDataDailySalesAnalysis(*payload)
 	if err != nil {
 		return c.SetResultError(err.Error(), nil)
 	}
