@@ -171,7 +171,7 @@ func (b *BaseController) ValidateAccessOfRequestedURL(k *knot.WebContext) bool {
 }
 
 func (b *BaseController) Redirect(k *knot.WebContext, controller string, action string) {
-	urlString := "/" + b.AppName + "/" + controller + "/" + action
+	urlString := "/" + controller + "/" + action
 	http.Redirect(k.Writer, k.Request, urlString, http.StatusTemporaryRedirect)
 }
 
