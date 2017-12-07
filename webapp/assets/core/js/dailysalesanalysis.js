@@ -25,20 +25,39 @@ dsa.filterRejectionStatusSelected = ko.observableArray([])
 dsa.filterRequiredDeliveryDateStart = ko.observable('')
 dsa.filterRequiredDeliveryDateFinish = ko.observable('')
 
+dsa.getFilterValues = function () {
+    return {
+        CreatedBy: dsa.filterCreatedBySelected(),
+        GeoMarket: dsa.filterGeoMarketSelected(),
+        MaterialGroup1: dsa.filterMaterialGroup1Selected(),
+        PerformingOrganization: dsa.filterPerformingOrganizationSelected(),
+        ProfitCenter: dsa.filterProfitCenterSelected(),
+        SalesOrg: dsa.filterSalesOrgSelected(),
+        SubGeoMarket: dsa.filterSubGeoMarketSelected(),
+        SubProductLine: dsa.filterSubProductLineSelected(),
+        SalesOrderType: dsa.filterSalesOrderTypeSelected(),
+        RejectionStatus: dsa.filterRejectionStatusSelected(),
+        RequiredDeliveryDateStart: ((dsa.filterRequiredDeliveryDateStart() || '') == '') ? '' : moment(dsa.filterRequiredDeliveryDateStart()).format('YYYYMMDD'),
+        RequiredDeliveryDateFinish: ((dsa.filterRequiredDeliveryDateFinish() || '') == '') ? '' : moment(dsa.filterRequiredDeliveryDateFinish()).format('YYYYMMDD'),
+        MonthMode: dsa.monthMode(),
+        Group: dsa.filterInsightGroupSelected()
+    }
+}
+
 dsa.monthMode = ko.observable('')
 dsa.monthMode.subscribe(function (newValue) {
-        dsa.filterCreatedBySelected([])
-        dsa.filterGeoMarketSelected([])
-        dsa.filterMaterialGroup1Selected([])
-        dsa.filterPerformingOrganizationSelected([])
-        dsa.filterProfitCenterSelected([])
-        dsa.filterSalesOrgSelected([])
-        dsa.filterSubGeoMarketSelected([])
-        dsa.filterSubProductLineSelected([])
-        dsa.filterSalesOrderTypeSelected([])
-        dsa.filterRejectionStatusSelected([])
-        dsa.filterRequiredDeliveryDateStart('')
-        dsa.filterRequiredDeliveryDateFinish('')
+    dsa.filterCreatedBySelected([])
+    dsa.filterGeoMarketSelected([])
+    dsa.filterMaterialGroup1Selected([])
+    dsa.filterPerformingOrganizationSelected([])
+    dsa.filterProfitCenterSelected([])
+    dsa.filterSalesOrgSelected([])
+    dsa.filterSubGeoMarketSelected([])
+    dsa.filterSubProductLineSelected([])
+    dsa.filterSalesOrderTypeSelected([])
+    dsa.filterRejectionStatusSelected([])
+    dsa.filterRequiredDeliveryDateStart('')
+    dsa.filterRequiredDeliveryDateFinish('')
 
     switch (newValue) {
         case 'october': 
@@ -119,21 +138,7 @@ dsa.loadDataMaster = function () {
 dsa.loadDataChartDailySalesAnalysis = function () {
     return new Promise(function (resolve, reject) {
         var url = "/DailySalesAnalysis/GetDataForLineChartForecastVsActual"
-        var param = {
-            CreatedBy: dsa.filterCreatedBySelected(),
-            GeoMarket: dsa.filterGeoMarketSelected(),
-            MaterialGroup1: dsa.filterMaterialGroup1Selected(),
-            PerformingOrganization: dsa.filterPerformingOrganizationSelected(),
-            ProfitCenter: dsa.filterProfitCenterSelected(),
-            SalesOrg: dsa.filterSalesOrgSelected(),
-            SubGeoMarket: dsa.filterSubGeoMarketSelected(),
-            SubProductLine: dsa.filterSubProductLineSelected(),
-            SalesOrderType: dsa.filterSalesOrderTypeSelected(),
-            RejectionStatus: dsa.filterRejectionStatusSelected(),
-            RequiredDeliveryDateStart: ((dsa.filterRequiredDeliveryDateStart() || '') == '') ? '' : moment(dsa.filterRequiredDeliveryDateStart()).format('YYYYMMDD'),
-            RequiredDeliveryDateFinish: ((dsa.filterRequiredDeliveryDateFinish() || '') == '') ? '' : moment(dsa.filterRequiredDeliveryDateFinish()).format('YYYYMMDD'),
-            MonthMode: dsa.monthMode()
-        }
+        var param = dsa.getFilterValues()
 
         ajaxPost(url, param, function (res) {
             if (res.Status !== "OK") {
@@ -315,10 +320,7 @@ dsa.loadDataChartDailySalesInsights = function () {
         }
 
         var url = "/DailySalesAnalysis/GetDataForTornadoChartAugVsOct"
-        var param = {
-            Group: dsa.filterInsightGroupSelected(),
-            Month: month
-        }
+        var param = dsa.getFilterValues()
 
         ajaxPost(url, param, function (res) {
             if (res.Status !== "OK") {

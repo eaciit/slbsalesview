@@ -8,5 +8,7 @@ db.getCollection('rawmainheader').find().limit(4).toArray().forEach(function (d)
         d.materialgroup1s.push(g.materialgroup1)
     })
 
+    d.rddparsed = new Date(d.rdd)
+    
     db.getCollection('rawmainheader').save(d)
 })

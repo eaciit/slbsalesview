@@ -17,6 +17,7 @@ type DailySalesAnalysisPayload struct {
 	SalesOrderType             []string
 	RejectionStatus            []string
 	MonthMode                  string
+	Group                      string
 	RequiredDeliveryDateStart  string
 	RequiredDeliveryDateFinish string
 }
@@ -77,21 +78,21 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 			return nil, 0, err
 		}
 
-		filter["requireddeliverydate"] = tk.M{"$gte": dateStart, "$lte": dateFinish}
+		filter["rddparsed"] = tk.M{"$gte": dateStart, "$lte": dateFinish}
 	} else if payload.RequiredDeliveryDateStart != "" {
 		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		filter["requireddeliverydate"] = tk.M{"$gte": dateStart}
+		filter["rddparsed"] = tk.M{"$gte": dateStart}
 	} else if payload.RequiredDeliveryDateFinish != "" {
 		dateFinish, err := time.Parse("20060102", payload.RequiredDeliveryDateFinish)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		filter["requireddeliverydate"] = tk.M{"$lte": dateFinish}
+		filter["rddparsed"] = tk.M{"$lte": dateFinish}
 	}
 
 	// =========== actual
@@ -156,8 +157,10 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 
 	switch payload.MonthMode {
 	case "october":
-		month = "October"
-		monthInt = 10
+		// month = "October"
+		// monthInt = 10
+		month = "September"
+		monthInt = 9
 	case "september":
 		month = "September"
 		monthInt = 9
@@ -209,52 +212,95 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 	return resultActual, proratedForecastValue, nil
 }
 
-func GetDataDailySalesInsight(group, month string) ([]tk.M, []tk.M, []tk.M, error) {
+func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M, []tk.M, error) {
+	filter := make(tk.M, 0)
+
+	if len(payload.SalesOrderType) > 0 {
+		filter["salesordertype"] = tk.M{"$in": payload.SalesOrderType}
+	}
+	if len(payload.RejectionStatus) > 0 {
+		filter["rejectionstatus"] = tk.M{"$in": payload.RejectionStatus}
+	}
+
+	if payload.RequiredDeliveryDateStart != "" && payload.RequiredDeliveryDateFinish != "" {
+		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		dateFinish, err := time.Parse("20060102", payload.RequiredDeliveryDateFinish)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		filter["rddparsed"] = tk.M{"$gte": dateStart, "$lte": dateFinish}
+	} else if payload.RequiredDeliveryDateStart != "" {
+		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		filter["rddparsed"] = tk.M{"$gte": dateStart}
+	} else if payload.RequiredDeliveryDateFinish != "" {
+		dateFinish, err := time.Parse("20060102", payload.RequiredDeliveryDateFinish)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		filter["rddparsed"] = tk.M{"$lte": dateFinish}
+	}
 
 	// ============== aggr actual data
 
+	month := "October"
 	monthInt := "10"
-	switch month {
+	switch payload.MonthMode {
 	case "october":
-		monthInt = "10"
+		// month = "October"
+		// monthInt = "10"
+		month = "September"
+		monthInt = "09"
 	case "september":
+		month = "September"
 		monthInt = "09"
 	case "august":
+		month = "August"
 		monthInt = "08"
 	}
 
-	pipeAggrActual, err := DeserializeArray(`
-        [{
-            "$project": {
-                "month": {
-                    "$dateToString": {
-                        "format": "%m",
-                        "date": "$salesorderdate"
-                    }
-                },
-                "netvalue(usd)": 1,
-                "subgeomarket": 1,
-                "subproductline": 1
-            }
-        }, {
-            "$match": {
-                "month": "` + monthInt + `"
-            }
-        }, {
-            "$group": {
-                "_id": {
-                    "group": "$` + group + `",
-                    "month": "$month"
-                },
-                "actual": {
-                    "$sum": "$netvalue(usd)"
-                }
-            }
-        }]
-    `)
-	if err != nil {
-		return nil, nil, nil, err
+	pipeAggrActual := []tk.M{}
+	if len(filter) > 0 {
+		pipeAggrActual = append(pipeAggrActual, tk.M{"$match": filter})
 	}
+	pipeAggrActual = append(pipeAggrActual, tk.M{
+		"$project": tk.M{
+			"month": tk.M{
+				"$dateToString": tk.M{
+					"format": "%m",
+					"date":   "$salesorderdate",
+				},
+			},
+			"netvalue(usd)":  1,
+			"subgeomarket":   1,
+			"subproductline": 1,
+		},
+	}, tk.M{
+		"$match": tk.M{
+			"month": monthInt,
+		},
+	}, tk.M{
+		"$group": tk.M{
+			"_id": tk.M{
+				"group": "$" + payload.Group,
+				"month": "$month",
+			},
+			"actual": tk.M{
+				"$sum": "$netvalue(usd)",
+			},
+		},
+	})
+
+	tk.Println("pipeAggrActual", tk.JsonString(pipeAggrActual))
 
 	csrAggrActual, err := Conn.NewQuery().
 		Command("pipe", pipeAggrActual).
@@ -275,33 +321,31 @@ func GetDataDailySalesInsight(group, month string) ([]tk.M, []tk.M, []tk.M, erro
 
 	// ============== aggr forecast data
 
-	pipeAggrForecast, err := DeserializeArray(`
-        [{
-            "$project": {
-                "forecastmonth": 1,
-                "subgeomarket": 1,
-                "subproductline": 1,
-                "salesordertype": 1,
-                "forecast": 1
-            }
-        }, {
-            "$match": {
-                "salesordertype": "Forecast",
-                "forecastmonth": "` + month + `"
-            }
-        }, {
-            "$group": {
-                "_id": "$` + group + `",
-                "forecast": {
-                    "$sum": "$forecast"
-                }
-            }
-        }]
-    `)
-
-	if err != nil {
-		return nil, nil, nil, err
+	pipeAggrForecast := []tk.M{}
+	if len(filter) > 0 {
+		pipeAggrForecast = append(pipeAggrForecast, tk.M{"$match": filter})
 	}
+	pipeAggrForecast = append(pipeAggrForecast, tk.M{
+		"$project": tk.M{
+			"forecastmonth":  1,
+			"subgeomarket":   1,
+			"subproductline": 1,
+			"salesordertype": 1,
+			"forecast":       1,
+		},
+	}, tk.M{
+		"$match": tk.M{
+			"salesordertype": "Forecast",
+			"forecastmonth":  month,
+		},
+	}, tk.M{
+		"$group": tk.M{
+			"_id": "$" + payload.Group,
+			"forecast": tk.M{
+				"$sum": "$forecast",
+			},
+		},
+	})
 
 	csrAggrForecast, err := Conn.NewQuery().
 		Command("pipe", pipeAggrForecast).
@@ -322,12 +366,9 @@ func GetDataDailySalesInsight(group, month string) ([]tk.M, []tk.M, []tk.M, erro
 
 	// ============== master data
 
-	pipeMaster, err := DeserializeArray(`
-        [{ "$group": { "_id": "$` + group + `" } }]
-    `)
-	if err != nil {
-		return nil, nil, nil, err
-	}
+	pipeMaster := []tk.M{tk.M{
+		"$group": tk.M{"_id": "$" + payload.Group},
+	}}
 
 	csrMaster, err := Conn.NewQuery().
 		Command("pipe", pipeMaster).

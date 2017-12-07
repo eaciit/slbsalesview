@@ -52,16 +52,13 @@ func (c *DailySalesAnalysisController) GetDataForTornadoChartAugVsOct(k *knot.We
 		return nil
 	}
 
-	payload := struct {
-		Group string
-		Month string
-	}{}
-	err := k.GetPayload(&payload)
+	payload := new(models.DailySalesAnalysisPayload)
+	err := k.GetPayload(payload)
 	if err != nil {
 		return c.SetResultError(err.Error(), nil)
 	}
 
-	dataAggrActual, dataAggrForecast, dataMaster, err := models.GetDataDailySalesInsight(payload.Group, payload.Month)
+	dataAggrActual, dataAggrForecast, dataMaster, err := models.GetDataDailySalesInsight(*payload)
 	if err != nil {
 		return c.SetResultError(err.Error(), nil)
 	}
