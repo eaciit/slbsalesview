@@ -36,20 +36,11 @@ func NewMainHeaderModel() *MainHeaderModel {
 func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float64, error) {
 
 	filter := tk.M{}
-	if len(payload.CreatedBy) > 0 {
-		filter["createdby"] = tk.M{"$in": payload.CreatedBy}
-	}
 	if len(payload.GeoMarket) > 0 {
 		filter["geomarket"] = tk.M{"$in": payload.GeoMarket}
 	}
 	if len(payload.MaterialGroup1) > 0 {
 		filter["materialgroup1s"] = tk.M{"$in": payload.MaterialGroup1}
-	}
-	if len(payload.PerformingOrganization) > 0 {
-		filter["performingorganization"] = tk.M{"$in": payload.PerformingOrganization}
-	}
-	if len(payload.ProfitCenter) > 0 {
-		filter["profitcenters"] = tk.M{"$in": payload.ProfitCenter}
 	}
 	if len(payload.SalesOrg) > 0 {
 		filter["salesorg"] = tk.M{"$in": payload.SalesOrg}
@@ -69,6 +60,7 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 
 	if payload.RequiredDeliveryDateStart != "" && payload.RequiredDeliveryDateFinish != "" {
 		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
+		dateStart = dateStart.AddDate(0, 0, -1)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -78,14 +70,15 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 			return nil, 0, err
 		}
 
-		filter["rddparsed"] = tk.M{"$gte": dateStart, "$lte": dateFinish}
+		filter["rddparsed"] = tk.M{"$gt": dateStart, "$lte": dateFinish}
 	} else if payload.RequiredDeliveryDateStart != "" {
 		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
+		dateStart = dateStart.AddDate(0, 0, -1)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		filter["rddparsed"] = tk.M{"$gte": dateStart}
+		filter["rddparsed"] = tk.M{"$gt": dateStart}
 	} else if payload.RequiredDeliveryDateFinish != "" {
 		dateFinish, err := time.Parse("20060102", payload.RequiredDeliveryDateFinish)
 		if err != nil {
@@ -157,8 +150,10 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 
 	switch payload.MonthMode {
 	case "october":
-		month = "October"
-		monthInt = 10
+		// month = "October"
+		// monthInt = 10
+		month = "September"
+		monthInt = 9
 	case "september":
 		month = "September"
 		monthInt = 9
@@ -167,8 +162,12 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 		monthInt = 8
 	}
 
+	filter.Unset("rddparsed")
+	filter.Unset("salesordertype")
+	filter.Unset("rejectionstatus")
+
 	pipeForecast := []tk.M{
-		// tk.M{"$match": filter}, // disable filter
+		tk.M{"$match": filter}, // disable filter
 		tk.M{"$match": tk.M{
 			"forecastmonth":  month,
 			"salesordertype": "Forecast",
@@ -223,6 +222,7 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 
 	if payload.RequiredDeliveryDateStart != "" && payload.RequiredDeliveryDateFinish != "" {
 		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
+		dateStart = dateStart.AddDate(0, 0, -1)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -232,14 +232,15 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 			return nil, nil, nil, err
 		}
 
-		filter["rddparsed"] = tk.M{"$gte": dateStart, "$lte": dateFinish}
+		filter["rddparsed"] = tk.M{"$gt": dateStart, "$lte": dateFinish}
 	} else if payload.RequiredDeliveryDateStart != "" {
 		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
+		dateStart = dateStart.AddDate(0, 0, -1)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 
-		filter["rddparsed"] = tk.M{"$gte": dateStart}
+		filter["rddparsed"] = tk.M{"$gt": dateStart}
 	} else if payload.RequiredDeliveryDateFinish != "" {
 		dateFinish, err := time.Parse("20060102", payload.RequiredDeliveryDateFinish)
 		if err != nil {
@@ -264,6 +265,7 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 		month = "August"
 		monthInt = "08"
 	}
+	_ = monthInt
 
 	pipeAggrActual := []tk.M{}
 	if len(filter) > 0 {
@@ -283,7 +285,7 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 		},
 	}, tk.M{
 		"$match": tk.M{
-			"month": monthInt,
+			"month": tk.M{"$in": []string{"08", "09", "10"}},
 		},
 	}, tk.M{
 		"$group": tk.M{
@@ -318,10 +320,44 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 
 	// ============== aggr forecast data
 
+	filter = tk.M{}
+	if len(payload.GeoMarket) > 0 {
+		filter["geomarket"] = tk.M{"$in": payload.GeoMarket}
+	}
+	if len(payload.MaterialGroup1) > 0 {
+		filter["materialgroup1s"] = tk.M{"$in": payload.MaterialGroup1}
+	}
+	if len(payload.SalesOrg) > 0 {
+		filter["salesorg"] = tk.M{"$in": payload.SalesOrg}
+	}
+	if len(payload.SubGeoMarket) > 0 {
+		filter["subgeomarket"] = tk.M{"$in": payload.SubGeoMarket}
+	}
+	if len(payload.SubProductLine) > 0 {
+		filter["subproductline"] = tk.M{"$in": payload.SubProductLine}
+	}
+
+	month = "October"
+	monthInt = "10"
+	switch payload.MonthMode {
+	case "october":
+		// month = "October"
+		// monthInt = "10"
+		month = "September"
+		monthInt = "09"
+	case "september":
+		month = "September"
+		monthInt = "09"
+	case "august":
+		month = "August"
+		monthInt = "08"
+	}
+	_ = monthInt
+
 	pipeAggrForecast := []tk.M{}
-	// if len(filter) > 0 {
-	// 	pipeAggrForecast = append(pipeAggrForecast, tk.M{"$match": filter})
-	// }
+	if len(filter) > 0 {
+		pipeAggrForecast = append(pipeAggrForecast, tk.M{"$match": filter})
+	}
 	pipeAggrForecast = append(pipeAggrForecast, tk.M{
 		"$project": tk.M{
 			"forecastmonth":  1,

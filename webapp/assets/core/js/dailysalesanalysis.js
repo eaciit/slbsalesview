@@ -157,11 +157,13 @@ dsa.loadDataChartDailySalesAnalysis = function () {
         var doIt = function (param, callbackOK, callbackFail) {
             var url = "/DailySalesAnalysis/GetDataForLineChartForecastVsActual"
 
-            if (param.MonthMode == "october") {
-                param.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-09-01').toDate())
-                param.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-09-30').toDate())
-                param.MonthMode = 'september'
-            }
+            param = JSON.parse(JSON.stringify(param))
+
+            // if (param.MonthMode == "october") {
+            //     param.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-09-01').toDate())
+            //     param.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-09-30').toDate())
+            //     param.MonthMode = 'september'
+            // }
 
             ajaxPost(url, param, function (res) {
                 if (res.Status !== "OK") {
@@ -199,9 +201,15 @@ dsa.loadDataChartDailySalesAnalysis = function () {
                                 dsa.constructDataChartDailySalesAnalysis(param3.MonthMode, data3).then(function (data3Constructed) {
 
                                     data1Constructed.forEach(function (d, i) {
-                                        d.actualSeptember = (data2Constructed[i] || { actualSeptember: 0 }).actualSeptember
                                         d.actualAugust = (data3Constructed[i] || { actualAugust: 0 }).actualAugust
+                                        d.actualSeptember = (data2Constructed[i] || { actualSeptember: 0 }).actualSeptember
+
+                                        if (i == 30) {
+                                            d.actualSeptember = null
+                                        }
                                     })
+
+                                    console.log('data1Constructed', data1Constructed)
 
                                     resolve(data1Constructed)
                                 })
@@ -293,7 +301,7 @@ dsa.constructDataChartDailySalesAnalysis = function (monthMode, data) {
 
             var dataFoundOctober = data.Actual.find(function (d) {
                 // return d.month == "10" && d.day == i
-                return d.month == "09" && d.day == i
+                return d.month == "10" && d.day == i
             })
             if (typeof dataFoundOctober !== 'undefined') {
                 rowData.actualOctober = dataFoundOctober.actual
@@ -432,62 +440,210 @@ dsa.renderChartDailySalesAnalysis = function (data) {
 
 dsa.loadDataChartDailySalesInsights = function () {
     return new Promise(function (resolve, reject) {
-        var month = "October"
-        if (dsa.monthMode() == 'august') {
-            month = "August"
-        } else if (dsa.monthMode() == 'september') {
-            month = "September"
+        var doIt = function (param, callbackOK, callbackFail) {
+            var url = "/DailySalesAnalysis/GetDataForTornadoChartAugVsOct"
+
+            param = JSON.parse(JSON.stringify(param))
+
+            ajaxPost(url, param, function (res) {
+                if (res.Status !== "OK") {
+                    callbackFail(res.Message)
+                    return
+                }
+
+                callbackOK(res.Data)
+            }, function (res) {
+                callbackFail(xhr.responseText)
+            })
         }
 
-        var url = "/DailySalesAnalysis/GetDataForTornadoChartAugVsOct"
         var param = dsa.getFilterValues()
+        if (dsa.insightMode() == 'actualforecast') {
+            doIt(param, function (data) {
+                dsa.constructDataChartDailySalesInsights(param.MonthMode, data).then(function (dataConstructed) {
+                    resolve(dataConstructed)
+                })
+            }, function (errorMessage) {
+                reject(errorMessage)
+            })
 
-        ajaxPost(url, param, function (res) {
-            if (res.Status !== "OK") {
-                reject(res.Message)
-                return
+        } else {
+            var param = dsa.getFilterValues()
+
+            if (param.MonthMode == 'october') {
+                var param1 = dsa.getFilterValues()
+                param1.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-10-01').toDate())
+                param1.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-10-31').toDate())
+                param1.MonthMode = 'october'
+                doIt(param1, function (data1) {
+                    dsa.constructDataChartDailySalesInsights(param1.MonthMode, data1).then(function (data1Constructed) {
+
+                        var param2 = dsa.getFilterValues()
+                        param2.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-09-01').toDate())
+                        param2.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-09-30').toDate())
+                        param2.MonthMode = 'september'
+                        doIt(param2, function (data2) {
+                            dsa.constructDataChartDailySalesInsights(param2.MonthMode, data2).then(function (data2Constructed) {
+
+                                data1Constructed.rows.forEach(function (d, i) {
+                                    d.prevValue = 0
+
+                                    var found = data2Constructed.rows.find(function (g) {
+                                        return g._id == d._id
+                                    })
+                                    if (typeof found != 'undefined') {
+                                        d.prevValue = found.nextValue
+                                    }
+
+                                    // console.log(d._id, 'nextValue', d.nextValue, 'prevValue', d.prevValue)
+                                    d.difference = d.nextValue - d.prevValue
+                                })
+                                data1Constructed.rows = _.orderBy(data1Constructed.rows, 'difference', 'desc')
+
+                                data1Constructed.max = _.maxBy([
+                                    _.maxBy(data1Constructed.rows, 'difference').difference,
+                                    Math.abs(_.minBy(data1Constructed.rows, 'difference').difference),
+                                ])
+
+                                resolve(data1Constructed)
+                            })
+                        }, function (errorMessage) {
+                            reject(errorMessage)
+                        })
+                    })
+                }, function (errorMessage) {
+                    reject(errorMessage)
+                })
+            } else if (param.MonthMode == 'september') {
+                var param2 = dsa.getFilterValues()
+                param2.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-09-01').toDate())
+                param2.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-09-30').toDate())
+                param2.MonthMode = 'september'
+                doIt(param2, function (data2) {
+                    dsa.constructDataChartDailySalesInsights(param2.MonthMode, data2).then(function (data2Constructed) {
+
+                        var param3 = dsa.getFilterValues()
+                        param3.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-07-26').toDate())
+                        param3.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-08-31').toDate())
+                        param3.MonthMode = 'august'
+                        doIt(param3, function (data3) {
+                            dsa.constructDataChartDailySalesInsights(param3.MonthMode, data3).then(function (data3Constructed) {
+
+                                console.log('data2Constructed', JSON.parse(JSON.stringify(data2Constructed)))
+                                console.log('data3Constructed', JSON.parse(JSON.stringify(data3Constructed)))
+
+                                data2Constructed.rows.forEach(function (d, i) {
+                                    d.prevValue = 0
+
+                                    var found = data3Constructed.rows.find(function (g) {
+                                        return g._id == d._id
+                                    })
+                                    if (typeof found != 'undefined') {
+                                        d.prevValue = found.nextValue
+                                    }
+
+                                    console.log(d._id, 'nextValue', d.nextValue, 'prevValue', d.prevValue)
+                                    d.difference = d.nextValue - d.prevValue
+                                })
+                                data2Constructed.rows = _.orderBy(data2Constructed.rows, 'difference', 'desc')
+
+                                data2Constructed.max = _.maxBy([
+                                    _.maxBy(data2Constructed.rows, 'difference').difference,
+                                    Math.abs(_.minBy(data2Constructed.rows, 'difference').difference),
+                                ])
+                                resolve(data2Constructed)
+                            })
+                        }, function (errorMessage) {
+                            reject(errorMessage)
+                        })
+                    })
+                }, function (errorMessage) {
+                    reject(errorMessage)
+                })
             }
-
-            resolve(res.Data)
-        }, function (res) {
-            reject(xhr.responseText)
-        })
+        }
     })
 }
 
-dsa.constructDataChartDailySalesInsights = function (data) {
+dsa.constructDataChartDailySalesInsights = function (monthMode, data) {
     return new Promise(function (resolve, reject) {
 
-        var flatData = data.Master.filter(function (d) {
-            return d._id != 0
-        }).map(function (d) {
-            d.actualValue = 0
-            d.forecastValue = 0
-            d.group = d._id
+        var flatData = []
 
-            var dataFoundActual = data.DetailActual.find(function (e) {
-                return e._id.group == d.group
+        if (dsa.insightMode() == 'actualforecast') {
+            flatData = data.Master.filter(function (d) {
+                return d._id != 0
+            }).map(function (d) {
+                d.actualValue = 0
+                d.forecastValue = 0
+                d.group = d._id
+
+                var dataFoundActual = data.DetailActual.find(function (e) {
+                    return e._id.group == d.group
+                })
+                if (typeof dataFoundActual !== 'undefined') {
+                    d.actualValue = dataFoundActual.actual
+                }
+
+                var dataFoundForecast = data.DetailForecast.find(function (e) {
+                    return e._id == d.group
+                })
+                if (typeof dataFoundForecast !== 'undefined') {
+                    d.forecastValue = dataFoundForecast.forecast
+                }
+
+                d.difference = d.actualValue - d.forecastValue
+
+                return d
             })
-            if (typeof dataFoundActual !== 'undefined') {
-                d.actualValue = dataFoundActual.actual
+        } else {
+            var prevComparatorMonth = "08"
+            var nextComparatorMonth = "09"
+
+            if (monthMode == 'october') {
+                nextComparatorMonth = "10"
+                prevComparatorMonth = "09"
+            } else if (monthMode == 'september') {
+                nextComparatorMonth = "09"
+                prevComparatorMonth = "08"
+            } else {
+                nextComparatorMonth = "08"
+                prevComparatorMonth = "07"
             }
 
-            var dataFoundForecast = data.DetailForecast.find(function (e) {
-                return e._id == d.group
+            flatData = data.Master.filter(function (d) {
+                return d._id != 0
+            }).map(function (d) {
+                d.prevValue = 0
+                d.nextValue = 0
+                d.group = d._id
+
+                var dataFoundPrev = data.DetailActual.find(function (e) {
+                    return e._id.group == d.group && e._id.month == prevComparatorMonth
+                })
+                if (typeof dataFoundPrev !== 'undefined') {
+                    d.prevValue = dataFoundPrev.actual
+                }
+
+                var dataFoundNext = data.DetailActual.find(function (e) {
+                    return e._id.group == d.group && e._id.month == nextComparatorMonth
+                })
+                if (typeof dataFoundNext !== 'undefined') {
+                    d.nextValue = dataFoundNext.actual
+                }
+
+                d.difference = d.nextValue - d.prevValue
+
+                return d
             })
-            if (typeof dataFoundForecast !== 'undefined') {
-                d.forecastValue = dataFoundForecast.forecast
-            }
-
-            d.difference = d.actualValue - d.forecastValue
-
-            return d
-        })
+        }
 
         var flatDataSorted = _.orderBy(flatData, 'difference', 'desc')
         var max = Math.abs(_.maxBy(flatDataSorted, function (d) {
             return Math.abs(d.difference)
         }).difference)
+
+        console.log('flatDataSorted', flatDataSorted)
 
         resolve({
             rows: flatDataSorted,
@@ -599,9 +755,6 @@ dsa.refreshChartDailySalesInsights = function () {
 
     .then(function () {
         return dsa.loadDataChartDailySalesInsights()
-    })
-    .then(function (data) {
-        return dsa.constructDataChartDailySalesInsights(data)
     })
     .then(function (data) {
         return dsa.renderChartDailySalesInsights(data)
