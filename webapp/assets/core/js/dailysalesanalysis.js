@@ -157,10 +157,15 @@ dsa.constructDataChartDailySalesAnalysis = function (data) {
     return new Promise(function (resolve, reject) {
 
         var flatData = []
-        var iterableDate = moment("2017-08-01").toDate()
-        var finishDate = moment("2017-11-01").toDate()
 
-        for (i = 1; i <= 31; i++) {
+        var maxDate = 31
+        switch (dsa.monthMode()) {
+            case "august": maxDate = 31; break
+            case "september": maxDate = 30; break
+            case "october": maxDate = 31; break
+        }
+
+        for (i = 1; i <= maxDate; i++) {
             var rowData = {
                 day: i,
                 forecast: data.ProratedForecast,
