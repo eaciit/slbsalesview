@@ -25,6 +25,10 @@ dsa.filterRejectionStatusSelected = ko.observableArray([])
 dsa.filterRequiredDeliveryDateStart = ko.observable('')
 dsa.filterRequiredDeliveryDateFinish = ko.observable('')
 
+dsa.getDataValue = function (dateData) {
+    return ((dateData || '') == '') ? '' : moment(dateData).format('YYYYMMDD')
+}
+
 dsa.getFilterValues = function () {
     return {
         CreatedBy: dsa.filterCreatedBySelected(),
@@ -37,8 +41,8 @@ dsa.getFilterValues = function () {
         SubProductLine: dsa.filterSubProductLineSelected(),
         SalesOrderType: dsa.filterSalesOrderTypeSelected(),
         RejectionStatus: dsa.filterRejectionStatusSelected(),
-        RequiredDeliveryDateStart: ((dsa.filterRequiredDeliveryDateStart() || '') == '') ? '' : moment(dsa.filterRequiredDeliveryDateStart()).format('YYYYMMDD'),
-        RequiredDeliveryDateFinish: ((dsa.filterRequiredDeliveryDateFinish() || '') == '') ? '' : moment(dsa.filterRequiredDeliveryDateFinish()).format('YYYYMMDD'),
+        RequiredDeliveryDateStart: dsa.getDataValue(dsa.filterRequiredDeliveryDateStart()),
+        RequiredDeliveryDateFinish: dsa.getDataValue(dsa.filterRequiredDeliveryDateFinish()),
         MonthMode: dsa.monthMode(),
         Group: dsa.filterInsightGroupSelected()
     }
@@ -77,6 +81,8 @@ dsa.monthMode.subscribe(function (newValue) {
             dsa.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
             dsa.filterRequiredDeliveryDateStart(moment('2017-07-26').toDate())
             dsa.filterRequiredDeliveryDateFinish(moment('2017-08-31').toDate())
+            dsa.insightMode('actualforecast')
+            $('[href="#actualforecast"]').parent().addClass('active').siblings().removeClass('active')
         break
     }
 
@@ -89,14 +95,25 @@ dsa.monthMode.subscribe(function (newValue) {
     })
 })
 
+dsa.insightMode = ko.observable('')
+dsa.insightMode.subscribe(function (newValue) {
+    dsa.refreshChartDailySalesInsights()
+})
+dsa.insightModeMonthVersusLabel = ko.computed(function () {
+    if (dsa.monthMode() == 'october') {
+        return 'Oct Vs Sept'
+    } else if (dsa.monthMode() == 'september') {
+        return 'Sept Vs Aug'
+    } else {
+        return 'Aug'
+    }
+}, dsa.monthMode)
+
 dsa.refreshChartDailySalesAnalysis = function () {
     return newPromise()
 
     .then(function () {
         return dsa.loadDataChartDailySalesAnalysis()
-    })
-    .then(function (data) {
-        return dsa.constructDataChartDailySalesAnalysis(data)
     })
     .then(function (data) {
         return dsa.renderChartDailySalesAnalysis(data)
@@ -137,29 +154,114 @@ dsa.loadDataMaster = function () {
 
 dsa.loadDataChartDailySalesAnalysis = function () {
     return new Promise(function (resolve, reject) {
-        var url = "/DailySalesAnalysis/GetDataForLineChartForecastVsActual"
-        var param = dsa.getFilterValues()
+        var doIt = function (param, callbackOK, callbackFail) {
+            var url = "/DailySalesAnalysis/GetDataForLineChartForecastVsActual"
 
-        ajaxPost(url, param, function (res) {
-            if (res.Status !== "OK") {
-                reject(res.Message)
-                return
+            if (param.MonthMode == "october") {
+                param.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-09-01').toDate())
+                param.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-09-30').toDate())
+                param.MonthMode = 'september'
             }
 
-            resolve(res.Data)
-        }, function (res) {
-            reject(xhr.responseText)
-        })
+            ajaxPost(url, param, function (res) {
+                if (res.Status !== "OK") {
+                    callbackFail(res.Message)
+                    return
+                }
+
+                callbackOK(res.Data)
+            }, function (res) {
+                callbackFail(xhr.responseText)
+            })
+        }
+
+        var param = dsa.getFilterValues()
+        if (param.MonthMode === 'october') {
+            var param1 = dsa.getFilterValues()
+            param1.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-10-01').toDate())
+            param1.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-10-31').toDate())
+            param1.MonthMode = 'october'
+            doIt(param1, function (data1) {
+                dsa.constructDataChartDailySalesAnalysis(param1.MonthMode, data1).then(function (data1Constructed) {
+
+                    var param2 = dsa.getFilterValues()
+                    param2.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-09-01').toDate())
+                    param2.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-09-30').toDate())
+                    param2.MonthMode = 'september'
+                    doIt(param2, function (data2) {
+                        dsa.constructDataChartDailySalesAnalysis(param2.MonthMode, data2).then(function (data2Constructed) {
+
+                            var param3 = dsa.getFilterValues()
+                            param3.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-07-26').toDate())
+                            param3.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-08-31').toDate())
+                            param3.MonthMode = 'august'
+                            doIt(param3, function (data3) {
+                                dsa.constructDataChartDailySalesAnalysis(param3.MonthMode, data3).then(function (data3Constructed) {
+
+                                    data1Constructed.forEach(function (d, i) {
+                                        d.actualSeptember = (data2Constructed[i] || { actualSeptember: 0 }).actualSeptember
+                                        d.actualAugust = (data3Constructed[i] || { actualAugust: 0 }).actualAugust
+                                    })
+
+                                    resolve(data1Constructed)
+                                })
+                            }, function (errorMessage) {
+                                reject(errorMessage)
+                            })
+                        })
+                    }, function (errorMessage) {
+                        reject(errorMessage)
+                    })
+                })
+            }, function (errorMessage) {
+                reject(errorMessage)
+            })
+        } else if (param.MonthMode == 'september') {
+            var param2 = dsa.getFilterValues()
+            param2.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-09-01').toDate())
+            param2.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-09-30').toDate())
+            param2.MonthMode = 'september'
+            doIt(param2, function (data2) {
+                dsa.constructDataChartDailySalesAnalysis(param2.MonthMode, data2).then(function (data2Constructed) {
+
+                    var param3 = dsa.getFilterValues()
+                    param3.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-07-26').toDate())
+                    param3.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-08-31').toDate())
+                    param3.MonthMode = 'august'
+                    doIt(param3, function (data3) {
+                        dsa.constructDataChartDailySalesAnalysis(param3.MonthMode, data3).then(function (data3Constructed) {
+
+                            data2Constructed.forEach(function (d, i) {
+                                d.actualAugust = (data3Constructed[i] || { actualAugust: 0 }).actualAugust
+                            })
+
+                            resolve(data2Constructed)
+                        })
+                    }, function (errorMessage) {
+                        reject(errorMessage)
+                    })
+                })
+            }, function (errorMessage) {
+                reject(errorMessage)
+            })
+        } else if (param.MonthMode == 'august') {
+            doIt(dsa.getFilterValues(), function (data) {
+                dsa.constructDataChartDailySalesAnalysis(param.MonthMode, data).then(function (dataConstructed) {
+                    resolve(dataConstructed)
+                })
+            }, function (errorMessage) {
+                reject(errorMessage)
+            })
+        }
     })
 }
 
-dsa.constructDataChartDailySalesAnalysis = function (data) {
+dsa.constructDataChartDailySalesAnalysis = function (monthMode, data) {
     return new Promise(function (resolve, reject) {
-
         var flatData = []
 
         var maxDate = 31
-        switch (dsa.monthMode()) {
+        switch (monthMode) {
             case "august": maxDate = 31; break
             case "september": maxDate = 30; break
             case "october": maxDate = 31; break
@@ -190,7 +292,8 @@ dsa.constructDataChartDailySalesAnalysis = function (data) {
             }
 
             var dataFoundOctober = data.Actual.find(function (d) {
-                return d.month == "10" && d.day == i
+                // return d.month == "10" && d.day == i
+                return d.month == "09" && d.day == i
             })
             if (typeof dataFoundOctober !== 'undefined') {
                 rowData.actualOctober = dataFoundOctober.actual
@@ -224,45 +327,50 @@ dsa.constructDataChartDailySalesAnalysis = function (data) {
 dsa.renderChartDailySalesAnalysis = function (data) {
     return new Promise(function (resolve, reject) {
 
-        var series = [{
-            name: 'Oct Forecast',
-            field: 'forecast',
-        }, {
-            name: 'Oct Actual',
-            field: 'actualOctober',
-        }]
-        if (dsa.monthMode() == 'august') {
+        var series = []
+        if (dsa.monthMode() == 'october') {
             series = [{
-                name: 'Aug Forecast',
+                name: 'Oct Forecast',
                 field: 'forecast',
+                color: '#e74c3c'
+            }, {
+                name: 'Sept Actual',
+                field: 'actualSeptember',
+                color: '#9b59b6'
             }, {
                 name: 'Aug Actual',
                 field: 'actualAugust',
+                color: '#f1c40f'
+            }, {
+                name: 'Oct Actual',
+                field: 'actualOctober',
+                color: '#3498db'
             }]
         } else if (dsa.monthMode() == 'september') {
             series = [{
                 name: 'Sept Forecast',
                 field: 'forecast',
+                color: '#e74c3c'
             }, {
                 name: 'Sept Actual',
                 field: 'actualSeptember',
+                color: '#9b59b6'
+            }, {
+                name: 'Aug Actual',
+                field: 'actualAugust',
+                color: '#f1c40f'
+            }]
+        } else if (dsa.monthMode() == 'august') {
+            series = [{
+                name: 'Aug Forecast',
+                field: 'forecast',
+                color: '#e74c3c'
+            }, {
+                name: 'Aug Actual',
+                field: 'actualAugust',
+                color: '#f1c40f'
             }]
         }
-
-        // var series = [{
-        //     name: 'Oct Forecast',
-        //     field: 'forecast',
-        // }, {
-        //     name: 'Aug Actual',
-        //     field: 'actualAugust',
-        // }, {
-        //     name: 'Sept Actual',
-        //     field: 'actualSeptember',
-        // }, {
-        //     name: 'Oct Actual',
-        //     field: 'actualOctober',
-        // }]
-        
 
         var config = {
             chartArea: {
@@ -278,7 +386,6 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                     visible: false
                 }
             },
-            seriesColors: ['#e74c3c', '#3498db', '#9b59b6', '#f1c40f'],
             series: series,
             categoryAxis: {
                 field: 'day',
@@ -522,6 +629,7 @@ $(function () {
     })
     .then(function () {
         dsa.monthMode('october')
+        dsa.insightMode('actualforecast')
         $('.pre-render').hide().removeClass('pre-render')
     })
     .catch(function (errorMessage) {

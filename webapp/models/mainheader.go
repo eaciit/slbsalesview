@@ -157,10 +157,8 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 
 	switch payload.MonthMode {
 	case "october":
-		// month = "October"
-		// monthInt = 10
-		month = "September"
-		monthInt = 9
+		month = "October"
+		monthInt = 10
 	case "september":
 		month = "September"
 		monthInt = 9
@@ -257,10 +255,8 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 	monthInt := "10"
 	switch payload.MonthMode {
 	case "october":
-		// month = "October"
-		// monthInt = "10"
-		month = "September"
-		monthInt = "09"
+		month = "October"
+		monthInt = "10"
 	case "september":
 		month = "September"
 		monthInt = "09"

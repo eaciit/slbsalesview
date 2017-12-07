@@ -101,14 +101,12 @@
                             </div>
                         </div>
 
-                        <div class="col-md-3 no-padding-right">
+                        <!-- <div class="col-md-3 no-padding-right">
                             <label>Material Group</label>
                             <div>
                                 <select data-bind="kendoMultiSelect: { data: dsa.masterMaterialGroup1, value: dsa.filterMaterialGroup1Selected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
                             </div>
-                        </div>
-
-                        <div class="clearfix"></div>
+                        </div> -->
 
                         <div class="col-md-3 no-padding-right">
                             <label>Sales Order Type</label>
@@ -117,6 +115,8 @@
                             </div>
                         </div>
 
+                        <div class="clearfix"></div>
+
                         <div class="col-md-3 no-padding-right">
                             <label>Rejection Status</label>
                             <div>
@@ -124,7 +124,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-3 no-padding-right">
+                        <!-- <div class="col-md-3 no-padding-right">
                             <label>Requested Delivery Date - Start</label>
                             <div>
                                 <input data-bind="kendoDatePicker: { value: dsa.filterRequiredDeliveryDateStart, change: dsa.refreshChartDailySalesAnalysis }" style="width: 100%;"/>
@@ -136,8 +136,7 @@
                             <div>
                                 <input data-bind="kendoDatePicker: { value: dsa.filterRequiredDeliveryDateFinish, change: dsa.refreshChartDailySalesAnalysis }" style="width: 100%;"/>
                             </div>
-                        </div>
-                        
+                        </div> -->
 
                         <div class="clearfix"></div>
                     </div>
@@ -145,7 +144,7 @@
 
                 <div class="chart-analysis"></div>
 
-                <p class="note" data-bind="visible: dsa.monthMode() == 'august'">Inclusive of $19,531 of sales with required delivery date for the month of July.</p>
+                <!-- <p class="note" data-bind="visible: dsa.monthMode() == 'august'">Inclusive of $19,531 of sales with required delivery date for the month of July.</p> -->
             </div>
         </div>
     </div>
@@ -165,6 +164,19 @@
                         </div>
                     </div>
                 </div>
+
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="active">
+                        <a role="tab" data-toggle="tab" href="#actualforecast" onclick="dsa.insightMode('actualforecast')">
+                            Actual Vs Forecast
+                        </a>
+                    </li>
+                    <li>
+                        <a role="tab" data-toggle="tab" href="#monthversus" onclick="dsa.insightMode('monthversus')" data-bind="text: dsa.insightModeMonthVersusLabel, visible: dsa.monthMode() != 'august'">
+                            Oct vs Sept
+                        </a>
+                    </li>
+                </ul>
 
                 <div class="chart-insights"></div>
             </div>
