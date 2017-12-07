@@ -301,7 +301,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                 visible: true,
                 position: 'bottom',
                 margin: {
-                    top: 20
+                    top: 10
                 }
             },
             tooltip: {
