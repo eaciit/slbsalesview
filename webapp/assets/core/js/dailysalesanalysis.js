@@ -1,6 +1,24 @@
 var dsa = {}
 viewModel.dailySalesAnalysis = dsa
 
+dsa.loadDataMaster = function () {
+    return new Promise(function (resolve, reject) {
+        var url = '/DailySalesAnalysis/GetDataMaster'
+        var param = {}
+
+        ajaxPost(url, param, function (res) {
+            if (res.Status !== "OK") {
+                reject(res.Message)
+                return
+            }
+
+            resolve()
+        }, function (res) {
+            reject(xhr.responseText)
+        })
+    })
+}
+
 dsa.loadDataChartDailySalesAnalysis = function () {
     return new Promise(function (resolve, reject) {
         var url = "/DailySalesAnalysis/GetDataForLineChartForecastVsActual"
@@ -108,6 +126,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                     visible: false
                 }
             },
+            seriesColors: ['#e74c3c', '#3498db', '#9b59b6', '#f1c40f'],
             series: [{
                 name: 'Oct Forecast',
                 field: 'forecastOctober',
@@ -167,7 +186,7 @@ dsa.loadDataChartDailySalesInsights = function () {
     return new Promise(function (resolve, reject) {
         var url = "/DailySalesAnalysis/GetDataForTornadoChartAugVsOct"
         var param = {
-            Group: "subgeomarket"
+            Group: dsa.filterInsightGroupSelected()
         }
 
         ajaxPost(url, param, function (res) {
@@ -206,20 +225,13 @@ dsa.constructDataChartDailySalesInsights = function (data) {
                 d.septemberValue = dataFoundSeptember.actual
             }
 
-            d.leftValue = d.augustValue * -1
-            d.rightValue = d.septemberValue
+            d.difference = d.septemberValue - d.augustValue
 
             return d
         })
 
-        var flatDataSorted = _.orderBy(flatData, function (d) {
-            return d.augustValue + d.septemberValue
-        }, 'desc')
-
-        var max = _.maxBy([
-            _.maxBy(flatDataSorted, 'leftValue').leftValue, 
-            _.maxBy(flatDataSorted, 'rightValue').rightValue
-        ])
+        var flatDataSorted = _.orderBy(flatData, 'difference', 'desc')
+        var max = _.maxBy(flatDataSorted, 'difference').difference
 
         resolve({
             rows: flatDataSorted,
@@ -242,7 +254,10 @@ dsa.renderChartDailySalesInsights = function (data) {
 
         var config = {
             chartArea: {
-                background: 'transparent'
+                background: 'transparent',
+                margin: {
+                    left: 20
+                }
             },
             dataSource: {
                 data: data.rows
@@ -251,16 +266,13 @@ dsa.renderChartDailySalesInsights = function (data) {
                 type: "bar",
                 style: "smooth"
             },
+            seriesColors: ['#3498db', '#9b59b6'],
             series: [{
-                name: 'August',
-                field: 'leftValue',
-                stack: 'same'
-            }, {
-                name: 'September',
-                field: 'rightValue',
-                stack: 'same'
+                name: 'Difference',
+                field: 'difference',
             }],
             categoryAxis: {
+                axisCrossingValues: [0],
                 field: 'group',
                 labels: {
                     margin: {
@@ -275,7 +287,10 @@ dsa.renderChartDailySalesInsights = function (data) {
             },
             valueAxis: {
                 labels: {
-                    visible: false
+                    font: '10px Arial, Helvetica, sans-serif',
+                    template: function (d) {
+                        return '$' + kendo.toString(d.value / 1000000, 'n0') + 'M'
+                    }
                 },
                 majorGridLines: {
                     color: '#f5f5f5'
@@ -287,18 +302,12 @@ dsa.renderChartDailySalesInsights = function (data) {
                 min: data.max * -1
             },
             legend: {
-                categories: ['August', 'September'],
-                visible: true,
-                position: 'top',
-                margin: {
-                    bottom: 10,
-                    top: 0
-                }
+                visible: false
             },
             tooltip: {
                 visible: true,
                 template: function (d) {
-                    return d.category + ' : ' + '$' + kendo.toString(Math.abs(d.value / 1000000), 'N2') + ' M'
+                    return d.category + ' : ' + '$' + kendo.toString(d.value / 1000000, 'N2') + ' M'
                 }
             },
             dataBound: function () {
@@ -324,9 +333,36 @@ dsa.renderChartDailySalesInsights = function (data) {
     })
 }
 
+
+dsa.filterInsightGroup = ko.observableArray([
+    { value: 'subgeomarket', text: 'Sub Geo Market' },
+    { value: 'subproductline', text: 'Sub Product Line' }
+])
+dsa.filterInsightGroupSelected = ko.observable(dsa.filterInsightGroup()[0].value)
+dsa.refreshChartDailySalesInsights = function () {
+    newPromise()
+
+    .then(function () {
+        return dsa.loadDataChartDailySalesInsights()
+    })
+    .then(function (data) {
+        return dsa.constructDataChartDailySalesInsights(data)
+    })
+    .then(function (data) {
+        return dsa.renderChartDailySalesInsights(data)
+    })
+
+    .catch(function (errorMessage) {
+        swal('Error!', errorMessage, 'error')
+    })
+}
+
 $(function () {
     newPromise()
 
+    // .then(function () {
+    //     return dsa.loadDataMaster()
+    // })
     .then(function () {
         return dsa.loadDataChartDailySalesAnalysis()
     })

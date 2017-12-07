@@ -11,5 +11,5 @@
     "ssl": false,
     "sslPrivateKeyPath": "./../privatekey.pem",
     "sslCertificatePath": "./../certificate.pem",
-    "isDevMode": "false"
+    "isDevMode": "true"
 }

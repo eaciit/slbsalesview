@@ -41,6 +41,9 @@ body {
 .no-padding-left {
     padding-left: 0px;
 }
+.no-padding-right {
+    padding-right: 0px;
+}
 .no-padding-side {
     padding-right: 0px;
     padding-left: 0px;
@@ -208,4 +211,16 @@ body.page-login .layout-container {
 }
 body:not(.page-login) .layout-container .layout-content {
     padding: 15px;
+}
+
+
+.navigation {
+    margin-bottom: 10px;
+}
+.navigation label {
+    margin-bottom: 1px;
+    font-weight: normal;
+}
+.navigation label + div {
+    margin-bottom: 4px;
 }

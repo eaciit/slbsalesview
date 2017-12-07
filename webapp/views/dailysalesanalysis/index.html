@@ -27,6 +27,72 @@
                 <h4>Daily Sales Analysis</h4>
             </div>
             <div class="panel-body">
+
+                <div class="row navigation">
+                    <div class="col-md-12 no-padding-left">
+                            
+                        <div class="col-md-3 no-padding-right">
+                            <label>Sales Org</label>
+                            <div>
+                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Geo Market</label>
+                            <div>
+                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Sub Geo Market</label>
+                            <div>
+                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Performing Orgs</label>
+                            <div>
+                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Profit Centres</label>
+                            <div>
+                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Sub product line</label>
+                            <div>
+                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Creator</label>
+                            <div>
+                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Material Group</label>
+                            <div>
+                                <select data-bind="kendoDropDownList: { data: [], optionLabel: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+
                 <div class="chart-analysis"></div>
             </div>
         </div>
@@ -38,6 +104,16 @@
                 <h4>Insights</h4>
             </div>
             <div class="panel-body">
+
+                <div class="row navigation">
+                    <div class="col-md-12">
+                        <label>Group</label>
+                        <div>
+                            <select data-bind="kendoDropDownList: { data: dsa.filterInsightGroup, value: dsa.filterInsightGroupSelected, dataValueField: 'value', dataTextField: 'text', change: dsa.refreshChartDailySalesInsights }" style="width: 100%;"></select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="chart-insights"></div>
             </div>
         </div>

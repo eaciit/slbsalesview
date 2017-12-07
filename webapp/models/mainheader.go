@@ -75,8 +75,8 @@ func GetDataDailySalesAnalysis(salesorg, geomarket, subgeomarket, performingorga
 
 	// =========== forecast
 
-	month := "October"
-	monthInt := 10
+	month := "September" // "October"
+	monthInt := 9        // 10
 
 	pipeForecast, err := DeserializeArray(`
         [{
@@ -210,4 +210,25 @@ func GetDataDailySalesInsight(group string) ([]tk.M, []tk.M, error) {
 	}
 
 	return resultAggr, resultMaster, nil
+}
+
+func GetDataMasterByField(field string) ([]tk.M, error) {
+	csr, err := Conn.NewQuery().
+		From("master" + field).
+		Select().
+		Cursor(nil)
+	if csr != nil {
+		defer csr.Close()
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]tk.M, 0)
+	err = csr.Fetch(&result, 0, false)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
