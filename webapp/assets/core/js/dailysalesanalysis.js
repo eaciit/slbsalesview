@@ -289,7 +289,12 @@ dsa.renderChartDailySalesInsights = function (data) {
                 labels: {
                     font: '10px Arial, Helvetica, sans-serif',
                     template: function (d) {
-                        return '$' + kendo.toString(d.value / 1000000, 'n0') + 'M'
+                        var text = kendo.toString(d.value / 1000000, 'n0') + 'M'
+                        if (text.indexOf('-') > -1) {
+                            return text
+                        }
+
+                        return '$' + text
                     }
                 },
                 majorGridLines: {
@@ -307,7 +312,7 @@ dsa.renderChartDailySalesInsights = function (data) {
             tooltip: {
                 visible: true,
                 template: function (d) {
-                    return d.category + ' : ' + '$' + kendo.toString(d.value / 1000000, 'N2') + ' M'
+                    return d.category + ' : ' + '$ ' + kendo.toString(d.value / 1000000, 'N2') + 'M'
                 }
             },
             dataBound: function () {
