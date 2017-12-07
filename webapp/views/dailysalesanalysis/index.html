@@ -21,6 +21,21 @@
 <link rel="stylesheet" href="{{ NoCacheUrl "/static/core/css/dailysalesanalysis.css" }}" />
 
 <div class="row">
+
+    <div class="col-md-12">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="active">
+                <a role="tab" data-toggle="tab" href="#october" onclick="dsa.monthMode('october')">October</a>
+            </li>
+            <li>
+                <a role="tab" data-toggle="tab" href="#september" onclick="dsa.monthMode('september')">September</a>
+            </li>
+            <li>
+                <a role="tab" data-toggle="tab" href="#august" onclick="dsa.monthMode('august')">August</a>
+            </li>
+        </ul>
+    </div>
+
     <div class="col-md-9">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -106,16 +121,16 @@
                         </div>
 
                         <div class="col-md-3 no-padding-right">
-                            <label>Rejection Status</label>
+                            <label>Requested Delivery Date - Start</label>
                             <div>
-                                <select data-bind="kendoMultiSelect: { data: dsa.masterRejectionStatus, value: dsa.filterRejectionStatusSelected, change: dsa.refreshChartDailySalesAnalysis, placeholder: 'Select items' }" style="width: 100%;"></select>
+                                <input data-bind="kendoDatePicker: { value: dsa.filterRequiredDeliveryDateStart, change: dsa.refreshChartDailySalesAnalysis }" style="width: 100%;"/>
                             </div>
                         </div>
 
                         <div class="col-md-3 no-padding-right">
-                            <label>Requested Delivery Date</label>
+                            <label>Finish</label>
                             <div>
-                                <input data-bind="kendoDatePicker: { value: dsa.filterRequiredDeliveryDateSelected, change: dsa.refreshChartDailySalesAnalysis }" style="width: 100%;"/>
+                                <input data-bind="kendoDatePicker: { value: dsa.filterRequiredDeliveryDateFinish, change: dsa.refreshChartDailySalesAnalysis }" style="width: 100%;"/>
                             </div>
                         </div>
                         

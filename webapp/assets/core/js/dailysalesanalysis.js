@@ -22,7 +22,20 @@ dsa.filterSubGeoMarketSelected = ko.observableArray([])
 dsa.filterSubProductLineSelected = ko.observableArray([])
 dsa.filterSalesOrderTypeSelected = ko.observableArray([])
 dsa.filterRejectionStatusSelected = ko.observableArray([])
-dsa.filterRequiredDeliveryDateSelected = ko.observable('')
+dsa.filterRequiredDeliveryDateStart = ko.observable('')
+dsa.filterRequiredDeliveryDateFinish = ko.observable('')
+
+dsa.monthMode = ko.observable('october')
+dsa.monthMode.subscribe(function () {
+    newPromise()
+
+    .then(function () {
+        return dsa.refreshChartDailySalesAnalysis()
+    })
+    .then(function () {
+        return dsa.refreshChartDailySalesInsights()
+    })
+})
 
 dsa.refreshChartDailySalesAnalysis = function () {
     return newPromise()
@@ -72,10 +85,6 @@ dsa.loadDataMaster = function () {
 
 dsa.loadDataChartDailySalesAnalysis = function () {
     return new Promise(function (resolve, reject) {
-        var date = ''
-        if (dsa.filterRequiredDeliveryDateSelected() !== '') {
-            date = moment(dsa.filterRequiredDeliveryDateSelected()).format('YYYYMMDD')
-        }
         var url = "/DailySalesAnalysis/GetDataForLineChartForecastVsActual"
         var param = {
             CreatedBy: dsa.filterCreatedBySelected(),
@@ -88,7 +97,9 @@ dsa.loadDataChartDailySalesAnalysis = function () {
             SubProductLine: dsa.filterSubProductLineSelected(),
             SalesOrderType: dsa.filterSalesOrderTypeSelected(),
             RejectionStatus: dsa.filterRejectionStatusSelected(),
-            RequiredDeliveryDate: date
+            RequiredDeliveryDateStart: ((dsa.filterRequiredDeliveryDateStart() || '') == '') ? '' : moment(dsa.filterRequiredDeliveryDateStart()).format('YYYYMMDD'),
+            RequiredDeliveryDateFinish: ((dsa.filterRequiredDeliveryDateFinish() || '') == '') ? '' : moment(dsa.filterRequiredDeliveryDateFinish()).format('YYYYMMDD'),
+            MonthMode: dsa.monthMode()
         }
 
         ajaxPost(url, param, function (res) {
@@ -114,7 +125,7 @@ dsa.constructDataChartDailySalesAnalysis = function (data) {
         for (i = 1; i <= 31; i++) {
             var rowData = {
                 day: i,
-                forecastOctober: data.ProratedForecast,
+                forecast: data.ProratedForecast,
                 actualAugust: 0,
                 actualSeptember: 0,
                 actualOctober: 0,
@@ -146,7 +157,7 @@ dsa.constructDataChartDailySalesAnalysis = function (data) {
         var flatDataSorted = _.orderBy(flatData, 'day')
         var cumulativeData = flatDataSorted.map(function (each, index) {
             let prevData = {
-                forecastOctober: 0,
+                forecast: 0,
                 actualAugust: 0,
                 actualSeptember: 0,
                 actualOctober: 0,
@@ -156,7 +167,7 @@ dsa.constructDataChartDailySalesAnalysis = function (data) {
                 prevData = flatDataSorted[index - 1]
             }
 
-            each.forecastOctober = each.forecastOctober + prevData.forecastOctober
+            each.forecast = each.forecast + prevData.forecast
             each.actualAugust = each.actualAugust + prevData.actualAugust
             each.actualSeptember = each.actualSeptember + prevData.actualSeptember
             each.actualOctober = each.actualOctober + prevData.actualOctober
@@ -170,13 +181,36 @@ dsa.constructDataChartDailySalesAnalysis = function (data) {
 dsa.renderChartDailySalesAnalysis = function (data) {
     return new Promise(function (resolve, reject) {
 
-        var chartObject = $('.chart-analysis').data('kendoChart')
-        if (typeof chartObject !== 'undefined') {
-            chartObject.setDataSource(new kendo.data.DataSource({
-                data: data
-            }))
-            resolve()
-            return
+        var series = [{
+            name: 'Oct Forecast',
+            field: 'forecast',
+        }, {
+            name: 'Aug Actual',
+            field: 'actualAugust',
+        }, {
+            name: 'Sept Actual',
+            field: 'actualSeptember',
+        }, {
+            name: 'Oct Actual',
+            field: 'actualOctober',
+        }]
+        
+        if (dsa.monthMode() == 'august') {
+            series = [{
+                name: 'Aug Forecast',
+                field: 'forecast',
+            }, {
+                name: 'Aug Actual',
+                field: 'actualAugust',
+            }]
+        } else if (dsa.monthMode() == 'september') {
+            series = [{
+                name: 'Sept Forecast',
+                field: 'forecast',
+            }, {
+                name: 'Sept Actual',
+                field: 'actualSeptember',
+            }]
         }
 
         var config = {
@@ -194,19 +228,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                 }
             },
             seriesColors: ['#e74c3c', '#3498db', '#9b59b6', '#f1c40f'],
-            series: [{
-                name: 'Oct Forecast',
-                field: 'forecastOctober',
-            }, {
-                name: 'Aug Actual',
-                field: 'actualAugust',
-            }, {
-                name: 'Sept Actual',
-                field: 'actualSeptember',
-            }, {
-                name: 'Oct Actual',
-                field: 'actualOctober',
-            }],
+            series: series,
             categoryAxis: {
                 field: 'day',
                 labels: {
@@ -244,6 +266,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             }
         }
 
+        $('.chart-analysis').replaceWith('<div class="chart-analysis"></div>')
         $('.chart-analysis').kendoChart(config)
         resolve()
     })
@@ -251,9 +274,17 @@ dsa.renderChartDailySalesAnalysis = function (data) {
 
 dsa.loadDataChartDailySalesInsights = function () {
     return new Promise(function (resolve, reject) {
+        var month = "10"
+        if (dsa.monthMode() == 'august') {
+            month = "09"
+        } else if (dsa.monthMode() == 'september') {
+            month = "08"
+        }
+
         var url = "/DailySalesAnalysis/GetDataForTornadoChartAugVsOct"
         var param = {
-            Group: dsa.filterInsightGroupSelected()
+            Group: dsa.filterInsightGroupSelected(),
+            Month: month
         }
 
         ajaxPost(url, param, function (res) {
@@ -271,31 +302,62 @@ dsa.loadDataChartDailySalesInsights = function () {
 
 dsa.constructDataChartDailySalesInsights = function (data) {
     return new Promise(function (resolve, reject) {
-        var flatData = data.Master.filter(function (d) {
-            return d._id != 0
-        }).map(function (d) {
-            d.augustValue = 0
-            d.septemberValue = 0
-            d.group = d._id
 
-            var dataFoundAugust = data.Detail.find(function (e) {
-                return e._id.group == d.group && e._id.month == "08"
+        var flatData = []
+
+        if (dsa.monthMode() == 'october') {
+            flatData = data.Master.filter(function (d) {
+                return d._id != 0
+            }).map(function (d) {
+                d.augustValue = 0
+                d.septemberValue = 0
+                d.group = d._id
+
+                var dataFoundAugust = data.DetailActual.find(function (e) {
+                    return e._id.group == d.group && e._id.month == "08"
+                })
+                if (typeof dataFoundAugust !== 'undefined') {
+                    d.augustValue = dataFoundAugust.actual
+                }
+
+                var dataFoundSeptember = data.DetailActual.find(function (e) {
+                    return e._id.group == d.group && e._id.month == "09"
+                })
+                if (typeof dataFoundSeptember !== 'undefined') {
+                    d.septemberValue = dataFoundSeptember.actual
+                }
+
+                d.difference = d.septemberValue - d.augustValue
+
+                return d
             })
-            if (typeof dataFoundAugust !== 'undefined') {
-                d.augustValue = dataFoundAugust.actual
-            }
+        } else {
+            flatData = data.Master.filter(function (d) {
+                return d._id != 0
+            }).map(function (d) {
+                d.actualValue = 0
+                d.forecastValue = 0
+                d.group = d._id
 
-            var dataFoundSeptember = data.Detail.find(function (e) {
-                return e._id.group == d.group && e._id.month == "09"
+                var dataFoundActual = data.DetailActual.find(function (e) {
+                    return e._id.group == d.group
+                })
+                if (typeof dataFoundActual !== 'undefined') {
+                    d.actualValue = dataFoundActual.actual
+                }
+
+                var dataFoundForecast = data.DetailForecast.find(function (e) {
+                    return e._id.group == d.group && e._id.month == "09"
+                })
+                if (typeof dataFoundForecast !== 'undefined') {
+                    d.forecastValue = dataFoundForecast.forecast
+                }
+
+                d.difference = d.actualValue - d.forecastValue
+
+                return d
             })
-            if (typeof dataFoundSeptember !== 'undefined') {
-                d.septemberValue = dataFoundSeptember.actual
-            }
-
-            d.difference = d.septemberValue - d.augustValue
-
-            return d
-        })
+        }
 
         var flatDataSorted = _.orderBy(flatData, 'difference', 'desc')
         var max = _.maxBy(flatDataSorted, 'difference').difference
@@ -309,15 +371,6 @@ dsa.constructDataChartDailySalesInsights = function (data) {
 
 dsa.renderChartDailySalesInsights = function (data) {
     return new Promise(function (resolve, reject) {
-
-        var chartObject = $('.chart-insights').data('kendoChart')
-        if (typeof chartObject !== 'undefined') {
-            chartObject.setDataSource(new kendo.data.DataSource({
-                data: data.rows
-            }))
-            resolve()
-            return
-        }
 
         var config = {
             chartArea: {
@@ -400,6 +453,7 @@ dsa.renderChartDailySalesInsights = function (data) {
             }
         }
 
+        $('.chart-insights').replaceWith('<div class="chart-insights"></div>')
         $('.chart-insights').kendoChart(config)
         resolve()
     })
