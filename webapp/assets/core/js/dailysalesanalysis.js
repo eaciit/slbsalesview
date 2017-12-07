@@ -571,6 +571,16 @@ dsa.constructDataChartDailySalesInsights = function (monthMode, data) {
         var flatData = []
 
         if (dsa.insightMode() == 'actualforecast') {
+            var comparatorMonth = "09"
+
+            if (monthMode == 'october') {
+                comparatorMonth = "10"
+            } else if (monthMode == 'september') {
+                comparatorMonth = "09"
+            } else {
+                comparatorMonth = "08"
+            }
+
             flatData = data.Master.filter(function (d) {
                 return d._id != 0
             }).map(function (d) {
@@ -579,13 +589,14 @@ dsa.constructDataChartDailySalesInsights = function (monthMode, data) {
                 d.group = d._id
 
                 var dataFoundActual = data.DetailActual.find(function (e) {
-                    return e._id.group == d.group
+                    return e._id.group == d.group && e._id.month == comparatorMonth
                 })
                 if (typeof dataFoundActual !== 'undefined') {
                     d.actualValue = dataFoundActual.actual
                 }
 
                 var dataFoundForecast = data.DetailForecast.find(function (e) {
+                    console.log('-----', e._id, d.group)
                     return e._id == d.group
                 })
                 if (typeof dataFoundForecast !== 'undefined') {

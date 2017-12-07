@@ -320,23 +320,6 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 
 	// ============== aggr forecast data
 
-	filter = tk.M{}
-	if len(payload.GeoMarket) > 0 {
-		filter["geomarket"] = tk.M{"$in": payload.GeoMarket}
-	}
-	if len(payload.MaterialGroup1) > 0 {
-		filter["materialgroup1s"] = tk.M{"$in": payload.MaterialGroup1}
-	}
-	if len(payload.SalesOrg) > 0 {
-		filter["salesorg"] = tk.M{"$in": payload.SalesOrg}
-	}
-	if len(payload.SubGeoMarket) > 0 {
-		filter["subgeomarket"] = tk.M{"$in": payload.SubGeoMarket}
-	}
-	if len(payload.SubProductLine) > 0 {
-		filter["subproductline"] = tk.M{"$in": payload.SubProductLine}
-	}
-
 	month = "October"
 	monthInt = "10"
 	switch payload.MonthMode {
@@ -355,9 +338,9 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 	_ = monthInt
 
 	pipeAggrForecast := []tk.M{}
-	if len(filter) > 0 {
-		pipeAggrForecast = append(pipeAggrForecast, tk.M{"$match": filter})
-	}
+	// if len(filter) > 0 {
+	// 	pipeAggrForecast = append(pipeAggrForecast, tk.M{"$match": filter})
+	// }
 	pipeAggrForecast = append(pipeAggrForecast, tk.M{
 		"$project": tk.M{
 			"forecastmonth":  1,
@@ -379,6 +362,8 @@ func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M
 			},
 		},
 	})
+
+	tk.Println("=======>pipeAggrForecast", tk.JsonString(pipeAggrForecast))
 
 	csrAggrForecast, err := Conn.NewQuery().
 		Command("pipe", pipeAggrForecast).
