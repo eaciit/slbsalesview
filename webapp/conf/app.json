@@ -1,0 +1,15 @@
+{
+    "dbHost": "localhost:27123",
+    "dbName": "dbslbsalesview",
+    "dbUsername": "",
+    "dbPassword": "",
+    "dbTimeout": 10,
+    "loginExpiration": 72000,
+    "port": 9035,
+    "uploadPath": "./../assets/main/images/upload",
+    "landingPage": "/dashboard/index",
+    "ssl": false,
+    "sslPrivateKeyPath": "./../privatekey.pem",
+    "sslCertificatePath": "./../certificate.pem",
+    "isDevMode": "true"
+}

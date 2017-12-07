@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "rpgxe/RsCA8OKZh32Zu6vsSJR/E=",
+			"path": "github.com/eaciit/knot/knot.v1",
+			"revision": "500711ff5012b6fbacbd7037778ffadf8850a7a1",
+			"revisionTime": "2017-11-07T08:04:34Z"
+		}
+	],
+	"rootPath": "eaciit/eaciit-project-boilerplate/webapp"
+}

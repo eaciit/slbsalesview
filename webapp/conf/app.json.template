@@ -1,0 +1,11 @@
+{
+    "dbHost": "localhost:27123",
+    "dbName": "eaciit-project-boilerplate",
+    "dbUsername": "",
+    "dbPassword": "",
+    "dbTimeout": 10,
+    "loginExpiration": 72000,
+    "port": 9000,
+    "uploadPath": "./../assets/main/images/upload",
+    "landingPage": "/dashboard/index"
+}
