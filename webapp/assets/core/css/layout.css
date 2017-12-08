@@ -109,10 +109,10 @@ body.close-sidebar .layout-sidebar .navbar-nav li a:not(.toggler) span {
     opacity: 0;
 }
 body.close-sidebar .layout-header {
-    margin-left: 43px;
+    margin-left: 0px;
 }
 body.close-sidebar .layout-container {
-    margin-left: 43px;
+    margin-left: 0px;
 }
 body.page-login .layout-container {
     margin-left: 0px;
@@ -187,7 +187,7 @@ body.page-login .layout-container {
     transition: .2s ease-in-out margin-left;
 }
 .layout-header .navbar-brand {
-    padding: 0px 9px 0px 35px;
+    padding: 0px 9px 0px 9px;
     margin: 7px 0px 8px;
     border-right: 1px solid #354656;
     height: auto;
@@ -211,6 +211,10 @@ body.page-login .layout-container {
 }
 body:not(.page-login) .layout-container .layout-content {
     padding: 15px;
+}
+
+#navbar > .navbar-nav:nth-child(1) {
+    margin-left: 0px;
 }
 
 

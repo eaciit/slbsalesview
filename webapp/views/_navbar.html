@@ -1,52 +1,30 @@
-<div class="layout-sidebar">
-    <ul class="nav navbar-nav">
-        <li>
-            <a href="#" class="toggler">
-                <i class="fa fa-lg fa-bars"></i>
-            </a>
-        </li>
-    </ul>
-    <ul class="nav navbar-nav">
-        {{UnescapeHTML "<!-- ko foreach: dataNavigationMenuTree -->"}}
+<div class="layout-header">
+    <div class="navbar-header">
+        <a class="navbar-brand" target="_blank" href="/">
+            <img src="/static/core/images/logo.jpg">
+            <!-- <span data-bind="text: viewModel.appName"></span> -->
+        </a>
+    </div>
+
+    <div id="navbar" class="navbar-collapse collapse">
+        <!-- <ul class="nav navbar-nav"></ul> -->
+
+        <ul class="nav navbar-nav navbar-right">
+            {{UnescapeHTML "<!-- ko foreach: dataNavigationMenuTree -->"}}
             <li>
                 <a data-bind="attr: { title: Title, href: Url }, css: { 'active': (window.location.pathname == Url) }">
                     <i class="fa" data-bind="attr: { class: 'fa fa-' + Icon }"></i>
                     &nbsp; <span data-bind="text: Title">&nbsp;</span>
                 </a>
             </li>
-        {{UnescapeHTML "<!-- /ko -->"}}
+            {{UnescapeHTML "<!-- /ko -->"}}
 
-        <li>
-            <a title="Logout" href="/auth/dologout">
-                <i class="fa fa-sign-out"></i>
-                &nbsp; <span>Logout</span>
-            </a>
-        </li>
-    </ul>
-</div>
-
-<div class="layout-header">
-    <div class="navbar-header">
-        <a class="navbar-brand" target="_blank" href="/">
-            <img src="/static/core/images/logo.jpg">
-        </a>
-    </div>
-
-    <div id="navbar" class="navbar-collapse collapse">
-        <ul class="nav navbar-nav">
-            <li><a href="#" class="app-title" data-bind="text: viewModel.appName">&nbsp;</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right" style="display: none;">
-            <li class="dropdown">
+            <li class="dropdown" style="margin-left: 10px;">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-lg fa-gear"></i>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="#">Action</a></li>
-                    <li><a href="#">Another action</a></li>
-                    <li><a href="#">Something else here</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li><a href="#"><i class="fa fa-sign-out"></i>&nbsp;Logout</a></li>
+                    <li><a href="/auth/dologout"><i class="fa fa-sign-out"></i>&nbsp;Logout</a></li>
                 </ul>
             </li>
         </ul>
