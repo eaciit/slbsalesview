@@ -151,7 +151,7 @@ svc.renderChartSalesVsCollection = function (data) {
             color: '#27ae60',
         }, {
             field: 'deltaCumulative',
-            name: 'Delta Cumulative',
+            name: 'Cumulative Delta',
             type: 'line',
             dashType: 'dash',
             color: '#9b59b6',

@@ -101,9 +101,9 @@ dsa.insightMode.subscribe(function (newValue) {
 })
 dsa.insightModeMonthVersusLabel = ko.computed(function () {
     if (dsa.monthMode() == 'october') {
-        return 'Oct Vs Sept'
+        return 'Oct Vs Sep'
     } else if (dsa.monthMode() == 'september') {
-        return 'Sept Vs Aug'
+        return 'Sep Vs Aug'
     } else {
         return 'Aug'
     }
@@ -348,21 +348,21 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                 field: 'actualOctober',
                 color: '#3498db'
             }, {
-                name: 'Oct Forecast',
+                name: 'Oct Straight Line Forecast',
                 field: 'forecast',
                 color: '#e74c3c'
             }, {
-                name: 'Oct Forecast basis average fill %',
+                name: 'Oct Curved Forecast',
                 field: 'octoberForecastBasedOnAvgSales',
                 color: '#27ae60',
                 dashType: 'dash',
             }, {
-                name: 'Oct Actual proj on Delivery Date',
+                name: 'Predicted Oct based on Daily View',
                 field: 'octoberActualBasedOnDeliveryDate',
                 color: '#2c3e50',
                 dashType: 'dash'
             }, {
-                name: 'Sept Actual',
+                name: 'Sep Actual',
                 field: 'actualSeptember',
                 color: '#9b59b6',
             }, {
@@ -412,11 +412,11 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             // console.table(data)
         } else if (dsa.monthMode() == 'september') {
             series = [{
-                name: 'Sept Forecast',
+                name: 'Sep Forecast',
                 field: 'forecast',
                 color: '#e74c3c',
             }, {
-                name: 'Sept Actual',
+                name: 'Sep Actual',
                 field: 'actualSeptember',
                 color: '#9b59b6',
             }, {
