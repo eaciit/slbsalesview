@@ -474,7 +474,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                     return
                 }
 
-                data.forEach(function (d) {
+                data.forEach(function (d, i) {
                     d.octoberActualBasedOnDeliveryDate = 0
 
                     var found = res.Data.find(function (g) {
@@ -482,6 +482,11 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                     })
                     if (typeof found !== 'undefined') {
                         d.octoberActualBasedOnDeliveryDate = found.forecast
+                    }
+
+                    if (i > 0) {
+                        var prevData = data[i - 1]
+                        d.octoberActualBasedOnDeliveryDate += prevData.octoberActualBasedOnDeliveryDate
                     }
                 })
 
