@@ -68,6 +68,7 @@ func main() {
 	app.Register(&(controllers.AccessController{BaseController: baseCtrl}))
 	app.Register(&(controllers.DashboardController{BaseController: baseCtrl}))
 	app.Register(&(controllers.DailySalesAnalysisController{BaseController: baseCtrl}))
+	app.Register(&(controllers.BillingStageController{BaseController: baseCtrl}))
 	app.Static("static", filepath.Join(basePath, "assets"))
 
 	// registering other routes

@@ -1,0 +1,126 @@
+<script>viewModel.title('Daily Sales Analysis')</script>
+
+<!-- kendoui -->
+<script src="/static/3rdparty/kendoui/js/kendo.all.min.js"></script>
+<link rel="stylesheet" href="/static/3rdparty/kendoui/styles/kendo.material.min.css">
+<link rel="stylesheet" href="/static/3rdparty/kendoui/styles/kendo.common-bootstrap.min.css">
+<link rel="stylesheet" href="/static/3rdparty/kendoui/styles/kendo.dataviz.min.css">
+<link rel="stylesheet" href="/static/3rdparty/kendoui/styles/kendo.dataviz.bootstrap.min.css">
+
+<!-- lodash -->
+<script src="/static/3rdparty/lodash/lodash.js"></script>
+
+<!-- knockout-kendo -->
+<script src="/static/3rdparty/knockout-kendo/knockout-kendo.min.js"></script>
+
+<!-- momentjs -->
+<script src="/static/3rdparty/momentjs/moment.js"></script>
+
+<!-- core -->
+<script src="/static/core/js/billingstage.js"></script>
+<link rel="stylesheet" href="{{ NoCacheUrl "/static/core/css/billingstage.css" }}" />
+
+<div class="row">
+
+    <div class="col-md-12">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="active">
+                <a role="tab" data-toggle="tab" href="#october" onclick="bs.monthMode('october')">October</a>
+            </li>
+            <li>
+                <a role="tab" data-toggle="tab" href="#september" onclick="bs.monthMode('september')">September</a>
+            </li>
+            <li>
+                <a role="tab" data-toggle="tab" href="#august" onclick="bs.monthMode('august')">August</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Billing Stage</h4>
+
+                <button class="btn-sm btn btn-primary" onclick="bs.toggleFilter(this)">
+                    <i class="fa fa-filter"></i>&nbsp; Toggle filter
+                </button>
+            </div>
+            <div class="panel-body">
+
+                <div class="row navigation pre-render">
+                    <div class="col-md-12 no-padding-left">
+                            
+                        <div class="col-md-3 no-padding-right">
+                            <label>Sales Org</label>
+                            <div>
+                                <select data-bind="kendoMultiSelect: { data: bs.masterSalesOrg, value: bs.filterSalesOrgSelected, change: bs.refreshGrid, placeholder: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Geo Market</label>
+                            <div>
+                                <select data-bind="kendoMultiSelect: { data: bs.masterGeoMarket, value: bs.filterGeoMarketSelected, change: bs.refreshGrid, placeholder: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Sub Geo Market</label>
+                            <div>
+                                <select data-bind="kendoMultiSelect: { data: bs.masterSubGeoMarket, value: bs.filterSubGeoMarketSelected, change: bs.refreshGrid, placeholder: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Sub product line</label>
+                            <div>
+                                <select data-bind="kendoMultiSelect: { data: bs.masterSubProductLine, value: bs.filterSubProductLineSelected, change: bs.refreshGrid, placeholder: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Sales Order Type</label>
+                            <div>
+                                <select data-bind="kendoMultiSelect: { data: bs.masterSalesOrderType, value: bs.filterSalesOrderTypeSelected, change: bs.refreshGrid, placeholder: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 no-padding-right">
+                            <label>Rejection Status</label>
+                            <div>
+                                <select data-bind="kendoMultiSelect: { data: bs.masterRejectionStatus, value: bs.filterRejectionStatusSelected, change: bs.refreshGrid, placeholder: 'Select items' }" style="width: 100%;"></select>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="active">
+                                <a role="tab" data-toggle="tab" href="#tab1" onclick="bs.contentMode('tab1')">Tab 1</a>
+                            </li>
+                            <li>
+                                <a role="tab" data-toggle="tab" href="#tab2" onclick="bs.contentMode('tab2')">Tab 2</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="grid"></div>
+            </div>
+        </div>
+    </div>
+</div>

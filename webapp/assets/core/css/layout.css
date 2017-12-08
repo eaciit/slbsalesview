@@ -233,3 +233,7 @@ body:not(.page-login) .layout-container .layout-content {
     top: 5px;
     right: 5px;
 }
+
+.align-right {
+    text-align: right;
+}

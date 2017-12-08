@@ -20,6 +20,9 @@ type DailySalesAnalysisPayload struct {
 	Group                      string
 	RequiredDeliveryDateStart  string
 	RequiredDeliveryDateFinish string
+
+	SalesOrderDateStart  string
+	SalesOrderDateFinish string
 }
 
 type MainHeaderModel struct {
