@@ -372,7 +372,14 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             }]
 
             data.forEach(function (d, i) {
-                d.octoberForecastBasedOnAvgSales = ((d.actualSeptember || 0) + (d.actualAugust || 0)) / 2
+                var values = [d.actualSeptember, d.actualAugust]
+                if (values.indexOf(null) > -1) {
+                    values = values.filter(function (d) {
+                        return d != null
+                    })
+                }
+
+                d.octoberForecastBasedOnAvgSales = _.sumBy(values) / values.length
             })
         } else if (dsa.monthMode() == 'september') {
             series = [{
