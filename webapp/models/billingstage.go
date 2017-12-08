@@ -26,6 +26,9 @@ func generateGridFilter(payload DailySalesAnalysisPayload) (tk.M, error) {
 	if len(payload.RejectionStatus) > 0 {
 		filter["rejectionstatus"] = tk.M{"$in": payload.RejectionStatus}
 	}
+	if len(payload.CustomerName) > 0 {
+		filter["customername"] = tk.M{"$in": payload.CustomerName}
+	}
 
 	if payload.RequiredDeliveryDateStart != "" && payload.RequiredDeliveryDateFinish != "" {
 		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
@@ -167,8 +170,7 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) 
 	month := ""
 	switch payload.MonthMode {
 	case "october":
-		// month = "October"
-		month = "September"
+		month = "October"
 	case "september":
 		month = "September"
 	case "august":
@@ -215,6 +217,29 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) 
 	err = csrAggrForecast.Fetch(&resultAggrForecast, 0, false)
 	if err != nil {
 		return nil, err
+	}
+
+	// ============= master data
+
+	if len(resultAggrGrid) == 0 {
+		csrMaster, err := Conn.NewQuery().
+			Select().
+			From("mastersubgeomarket").
+			Cursor(nil)
+		if csrMaster != nil {
+			defer csrMaster.Close()
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		resultMaster := make([]tk.M, 0)
+		err = csrMaster.Fetch(&resultMaster, 0, false)
+		if err != nil {
+			return nil, err
+		}
+
+		resultAggrGrid = resultMaster
 	}
 
 	// ============= inject

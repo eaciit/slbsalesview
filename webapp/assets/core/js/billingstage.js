@@ -22,6 +22,7 @@ bs.filterSubGeoMarketSelected = ko.observableArray([])
 bs.filterSubProductLineSelected = ko.observableArray([])
 bs.filterSalesOrderTypeSelected = ko.observableArray([])
 bs.filterRejectionStatusSelected = ko.observableArray([])
+bs.filterCustomerNameSelected = ko.observableArray([])
 bs.filterRequiredDeliveryDateStart = ko.observable('')
 bs.filterRequiredDeliveryDateFinish = ko.observable('')
 bs.filterSalesOrderDateStart = ko.observable('')
@@ -47,6 +48,7 @@ bs.getFilterValues = function () {
         SubProductLine: bs.filterSubProductLineSelected(),
         SalesOrderType: bs.filterSalesOrderTypeSelected(),
         RejectionStatus: bs.filterRejectionStatusSelected(),
+        CustomerName: bs.filterCustomerNameSelected(),
         RequiredDeliveryDateStart: bs.getDataValue(bs.filterRequiredDeliveryDateStart()),
         RequiredDeliveryDateFinish: bs.getDataValue(bs.filterRequiredDeliveryDateFinish()),
         SalesOrderDateStart: bs.getDataValue(bs.filterSalesOrderDateStart()),
@@ -96,6 +98,7 @@ bs.monthMode.subscribe(function (newValue) {
     bs.filterSubProductLineSelected([])
     bs.filterSalesOrderTypeSelected([])
     bs.filterRejectionStatusSelected([])
+    bs.filterCustomerNameSelected([])
     bs.filterRequiredDeliveryDateStart('')
     bs.filterRequiredDeliveryDateFinish('')
     bs.filterSalesOrderDateStart('')
@@ -104,6 +107,7 @@ bs.monthMode.subscribe(function (newValue) {
     switch (newValue) {
         case 'october': 
             if (bs.contentMode() == 'tab1') {
+                bs.filterCustomerNameSelected(['Forecast'])
                 bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
                 bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
                 bs.filterRequiredDeliveryDateStart(moment('2017-10-01').toDate())
@@ -126,6 +130,8 @@ bs.monthMode.subscribe(function (newValue) {
                 bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected', 'Forecast'])
                 bs.filterRequiredDeliveryDateStart(moment('2017-07-26').toDate())
                 bs.filterRequiredDeliveryDateFinish(moment('2017-09-20').toDate())
+                bs.filterSalesOrderDateStart(moment('2017-07-30').toDate())
+                bs.filterSalesOrderDateFinish(moment('2017-10-01').toDate())
             }
         break
         case 'august': 
@@ -140,11 +146,9 @@ bs.monthMode.subscribe(function (newValue) {
                 bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT', 'Forecast'])
                 bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected', 'Forecast'])
                 bs.filterRequiredDeliveryDateStart(moment('2017-07-26').toDate())
-                bs.filterRequiredDeliveryDateFinish(moment('2017-10-01').toDate())
+                bs.filterRequiredDeliveryDateFinish(moment('2017-08-31').toDate())
                 bs.filterSalesOrderDateStart(moment('2017-07-30').toDate())
-                bs.filterSalesOrderDateFinish(moment('2017-08-31').toDate())
-                // bs.filterRequiredDeliveryDateStart(moment('2017-07-30').toDate())
-                // bs.filterRequiredDeliveryDateFinish(moment('2017-10-01').toDate())
+                bs.filterSalesOrderDateFinish(moment('2017-10-01').toDate())
             }
         break
     }

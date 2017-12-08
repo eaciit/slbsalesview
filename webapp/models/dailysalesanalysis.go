@@ -16,6 +16,7 @@ type DailySalesAnalysisPayload struct {
 	SubProductLine             []string
 	SalesOrderType             []string
 	RejectionStatus            []string
+	CustomerName               []string
 	MonthMode                  string
 	Group                      string
 	RequiredDeliveryDateStart  string
