@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"eaciit/slbsalesview/webapp/models"
 	"github.com/eaciit/knot/knot.v1"
 )
 
