@@ -214,6 +214,97 @@ func GetDataDailySalesAnalysis(payload DailySalesAnalysisPayload) ([]tk.M, float
 	return resultActual, proratedForecastValue, nil
 }
 
+func GetForecastBasedOnDeliveryDate(payload DailySalesAnalysisPayload) ([]tk.M, error) {
+
+	filter := tk.M{}
+	if len(payload.GeoMarket) > 0 {
+		filter["geomarket"] = tk.M{"$in": payload.GeoMarket}
+	}
+	if len(payload.MaterialGroup1) > 0 {
+		filter["materialgroup1s"] = tk.M{"$in": payload.MaterialGroup1}
+	}
+	if len(payload.SalesOrg) > 0 {
+		filter["salesorg"] = tk.M{"$in": payload.SalesOrg}
+	}
+	if len(payload.SubGeoMarket) > 0 {
+		filter["subgeomarket"] = tk.M{"$in": payload.SubGeoMarket}
+	}
+	if len(payload.SubProductLine) > 0 {
+		filter["subproductline"] = tk.M{"$in": payload.SubProductLine}
+	}
+	if len(payload.SalesOrderType) > 0 {
+		filter["salesordertype"] = tk.M{"$in": payload.SalesOrderType}
+	}
+	if len(payload.RejectionStatus) > 0 {
+		filter["rejectionstatus"] = tk.M{"$in": payload.RejectionStatus}
+	}
+
+	if payload.RequiredDeliveryDateStart != "" && payload.RequiredDeliveryDateFinish != "" {
+		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
+		dateStart = dateStart.AddDate(0, 0, -1)
+		if err != nil {
+			return nil, err
+		}
+
+		dateFinish, err := time.Parse("20060102", payload.RequiredDeliveryDateFinish)
+		if err != nil {
+			return nil, err
+		}
+
+		filter["rddparsed"] = tk.M{"$gt": dateStart, "$lte": dateFinish}
+	} else if payload.RequiredDeliveryDateStart != "" {
+		dateStart, err := time.Parse("20060102", payload.RequiredDeliveryDateStart)
+		dateStart = dateStart.AddDate(0, 0, -1)
+		if err != nil {
+			return nil, err
+		}
+
+		filter["rddparsed"] = tk.M{"$gt": dateStart}
+	} else if payload.RequiredDeliveryDateFinish != "" {
+		dateFinish, err := time.Parse("20060102", payload.RequiredDeliveryDateFinish)
+		if err != nil {
+			return nil, err
+		}
+
+		filter["rddparsed"] = tk.M{"$lte": dateFinish}
+	}
+
+	pipe := []tk.M{tk.M{
+		"$match": filter,
+	}, tk.M{
+		"$group": tk.M{
+			"_id": tk.M{
+				"$dateToString": tk.M{
+					"format": "%Y-%m-%d",
+					"date":   "$rddparsed",
+				},
+			},
+			"forecast": tk.M{
+				"$sum": "$netvalue(usd)",
+			},
+		},
+	}}
+
+	csr, err := Conn.NewQuery().
+		Command("pipe", pipe).
+		From(NewMainHeaderModel().TableName()).
+		Cursor(nil)
+	if csr != nil {
+		defer csr.Close()
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]tk.M, 0)
+	err = csr.Fetch(&result, 0, false)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func GetDataDailySalesInsight(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M, []tk.M, error) {
 	filter := make(tk.M, 0)
 

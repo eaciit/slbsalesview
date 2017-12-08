@@ -209,7 +209,7 @@ dsa.loadDataChartDailySalesAnalysis = function () {
                                         }
                                     })
 
-                                    console.log('data1Constructed', data1Constructed)
+                                    // console.log('data1Constructed', data1Constructed)
 
                                     resolve(data1Constructed)
                                 })
@@ -335,6 +335,12 @@ dsa.constructDataChartDailySalesAnalysis = function (monthMode, data) {
 dsa.renderChartDailySalesAnalysis = function (data) {
     return new Promise(function (resolve, reject) {
 
+        var doIt = function (config) {
+            $('.chart-analysis').replaceWith('<div class="chart-analysis"></div>')
+            $('.chart-analysis').kendoChart(config)
+            resolve()
+        }
+
         var series = []
         if (dsa.monthMode() == 'october') {
             series = [{
@@ -353,7 +359,25 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                 name: 'Oct Actual',
                 field: 'actualOctober',
                 color: '#3498db'
+            }, {
+                name: 'Oct Forecast based on Avg Sales',
+                field: 'octoberForecastBasedOnAvgSales',
+                color: '#27ae60',
+                dashType: 'dash'
+            }, {
+                name: 'Oct Actual proj on Delivery Date',
+                field: 'octoberActualBasedOnDeliveryDate',
+                color: '#2980b9',
+                dashType: 'dash'
             }]
+
+            data.forEach(function (d, i) {
+                if (i == 30) {
+                    return
+                }
+
+                d.octoberForecastBasedOnAvgSales = (d.actualSeptember + d.actualAugust) / 2
+            })
         } else if (dsa.monthMode() == 'september') {
             series = [{
                 name: 'Sept Forecast',
@@ -427,14 +451,49 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             tooltip: {
                 visible: true,
                 template: function (d) {
+                    if (d.series.field == 'octoberActualBasedOnDeliveryDate') {
+                        return d.series.name + ' : ' + '$' + kendo.toString(d.value, 'N2')
+                    }
+
                     return d.series.name + ' : ' + '$' + kendo.toString(d.value / 1000000, 'N2') + ' M'
                 }
             }
         }
 
-        $('.chart-analysis').replaceWith('<div class="chart-analysis"></div>')
-        $('.chart-analysis').kendoChart(config)
-        resolve()
+        if (dsa.monthMode() == 'october') {
+            var url = '/DailySalesAnalysis/GetForecastBasedOnDeliveryDate'
+            var param = dsa.getFilterValues()
+            param.RejectionStatus = ["Nothing Rejected", "Partially Rejected"]
+            param.SalesOrderType = ["ZFBL", "ZFDP", "ZSOR", "ZSPT"]
+            param.RequiredDeliveryDateStart = dsa.getDataValue(moment('2017-10-01').toDate())
+            param.RequiredDeliveryDateFinish = dsa.getDataValue(moment('2017-10-31').toDate())
+
+            ajaxPost(url, param, function (res) {
+                if (res.Status !== "OK") {
+                    reject(res.Message)
+                    return
+                }
+
+                data.forEach(function (d) {
+                    d.octoberActualBasedOnDeliveryDate = 0
+
+                    var found = res.Data.find(function (g) {
+                        return moment(g._id).date() == d.day
+                    })
+                    if (typeof found !== 'undefined') {
+                        d.octoberActualBasedOnDeliveryDate = found.forecast
+                    }
+                })
+
+                console.log('data', data)
+
+                doIt(config)
+            }, function (res) {
+                reject(res.responseText)
+            })
+        } else {
+            doIt(config)
+        }
     })
 }
 
@@ -529,8 +588,8 @@ dsa.loadDataChartDailySalesInsights = function () {
                         doIt(param3, function (data3) {
                             dsa.constructDataChartDailySalesInsights(param3.MonthMode, data3).then(function (data3Constructed) {
 
-                                console.log('data2Constructed', JSON.parse(JSON.stringify(data2Constructed)))
-                                console.log('data3Constructed', JSON.parse(JSON.stringify(data3Constructed)))
+                                // console.log('data2Constructed', JSON.parse(JSON.stringify(data2Constructed)))
+                                // console.log('data3Constructed', JSON.parse(JSON.stringify(data3Constructed)))
 
                                 data2Constructed.rows.forEach(function (d, i) {
                                     d.prevValue = 0
@@ -542,7 +601,7 @@ dsa.loadDataChartDailySalesInsights = function () {
                                         d.prevValue = found.nextValue
                                     }
 
-                                    console.log(d._id, 'nextValue', d.nextValue, 'prevValue', d.prevValue)
+                                    // console.log(d._id, 'nextValue', d.nextValue, 'prevValue', d.prevValue)
                                     d.difference = d.nextValue - d.prevValue
                                 })
                                 data2Constructed.rows = _.orderBy(data2Constructed.rows, 'difference', 'desc')
@@ -596,7 +655,7 @@ dsa.constructDataChartDailySalesInsights = function (monthMode, data) {
                 }
 
                 var dataFoundForecast = data.DetailForecast.find(function (e) {
-                    console.log('-----', e._id, d.group)
+                    // console.log('-----', e._id, d.group)
                     return e._id == d.group
                 })
                 if (typeof dataFoundForecast !== 'undefined') {
@@ -654,7 +713,7 @@ dsa.constructDataChartDailySalesInsights = function (monthMode, data) {
             return Math.abs(d.difference)
         }).difference)
 
-        console.log('flatDataSorted', flatDataSorted)
+        // console.log('flatDataSorted', flatDataSorted)
 
         resolve({
             rows: flatDataSorted,
@@ -747,7 +806,7 @@ dsa.renderChartDailySalesInsights = function (data) {
             }
         }
 
-        console.log('data', data.max)
+        // console.log('data', data.max)
 
         $('.chart-insights').replaceWith('<div class="chart-insights"></div>')
         $('.chart-insights').kendoChart(config)

@@ -42,8 +42,26 @@ func (c *DailySalesAnalysisController) GetDataForLineChartForecastVsActual(k *kn
 		dataActual,
 		dataForecast,
 	})
+}
 
-	return nil
+func (c *DailySalesAnalysisController) GetForecastBasedOnDeliveryDate(k *knot.WebContext) interface{} {
+	c.SetResponseTypeAJAX(k)
+	if !c.ValidateAccessOfRequestedURL(k) {
+		return nil
+	}
+
+	payload := new(models.DailySalesAnalysisPayload)
+	err := k.GetPayload(payload)
+	if err != nil {
+		return c.SetResultError(err.Error(), nil)
+	}
+
+	data, err := models.GetForecastBasedOnDeliveryDate(*payload)
+	if err != nil {
+		return c.SetResultError(err.Error(), nil)
+	}
+
+	return c.SetResultOK(data)
 }
 
 func (c *DailySalesAnalysisController) GetDataForTornadoChartAugVsOct(k *knot.WebContext) interface{} {
@@ -72,8 +90,6 @@ func (c *DailySalesAnalysisController) GetDataForTornadoChartAugVsOct(k *knot.We
 		dataAggrForecast,
 		dataMaster,
 	})
-
-	return nil
 }
 
 func (c *DailySalesAnalysisController) GetDataMaster(k *knot.WebContext) interface{} {
