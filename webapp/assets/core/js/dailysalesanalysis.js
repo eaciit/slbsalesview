@@ -367,7 +367,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             }, {
                 name: 'Oct Actual proj on Delivery Date',
                 field: 'octoberActualBasedOnDeliveryDate',
-                color: '#2980b9',
+                color: '#2c3e50',
                 dashType: 'dash'
             }]
 
