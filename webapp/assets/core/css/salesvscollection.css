@@ -1,0 +1,24 @@
+.panel-heading h4 {
+    margin: 0px;
+    font-weight: 500;
+}
+
+.nav-tabs {
+    margin-bottom: 10px;
+}
+
+.pre-render {
+    visibility: hidden;
+    height: 0px;
+    overflow: hidden;
+}
+
+.note {
+    margin-top: 15px;
+}
+
+.k-grid th[role="columnheader"],
+.k-grid td[role="gridcell"] {
+    white-space: inherit;
+    vertical-align: top;
+}

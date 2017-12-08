@@ -1,0 +1,36 @@
+<script>viewModel.title('Daily Sales Analysis')</script>
+
+<!-- kendoui -->
+<script src="/static/3rdparty/kendoui/js/kendo.all.min.js"></script>
+<link rel="stylesheet" href="/static/3rdparty/kendoui/styles/kendo.material.min.css">
+<link rel="stylesheet" href="/static/3rdparty/kendoui/styles/kendo.common-bootstrap.min.css">
+<link rel="stylesheet" href="/static/3rdparty/kendoui/styles/kendo.dataviz.min.css">
+<link rel="stylesheet" href="/static/3rdparty/kendoui/styles/kendo.dataviz.bootstrap.min.css">
+
+<!-- lodash -->
+<script src="/static/3rdparty/lodash/lodash.js"></script>
+
+<!-- knockout-kendo -->
+<script src="/static/3rdparty/knockout-kendo/knockout-kendo.min.js"></script>
+
+<!-- momentjs -->
+<script src="/static/3rdparty/momentjs/moment.js"></script>
+
+<!-- core -->
+<script src="{{ NoCacheUrl "/static/core/js/salesvscollection.js" }}"></script>
+<link rel="stylesheet" href="{{ NoCacheUrl "/static/core/css/salesvscollection.css" }}" />
+
+<div class="row">
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Sales Vs Collection</h4>
+            </div>
+            <div class="panel-body">
+
+                <div class="chart"></div>
+            </div>
+        </div>
+    </div>
+</div>
