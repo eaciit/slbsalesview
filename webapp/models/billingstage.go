@@ -8,6 +8,18 @@ import (
 func generateGridFilter(payload DailySalesAnalysisPayload) (tk.M, error) {
 	filter := make(tk.M, 0)
 
+	if len(payload.SalesOrg) > 0 {
+		filter["salesorg"] = tk.M{"$in": payload.SalesOrg}
+	}
+	if len(payload.GeoMarket) > 0 {
+		filter["geomarket"] = tk.M{"$in": payload.GeoMarket}
+	}
+	if len(payload.SubGeoMarket) > 0 {
+		filter["subgeomarket"] = tk.M{"$in": payload.SubGeoMarket}
+	}
+	if len(payload.SubProductLine) > 0 {
+		filter["subproductline"] = tk.M{"$in": payload.SubProductLine}
+	}
 	if len(payload.SalesOrderType) > 0 {
 		filter["salesordertype"] = tk.M{"$in": payload.SalesOrderType}
 	}
