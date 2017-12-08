@@ -183,7 +183,7 @@ bs.loadDataGrid = function (param) {
 bs.renderGrid = function (data) {
     var total = function (what) {
         return function (d) { 
-            return '<div class="align-right">$' + kendo.toString(d[what].sum, 'N0') + "</div>"
+            return '<div class="align-right">$' + kendo.toString(d[what].sum || 0, 'N0') + "</div>"
         }
     }
     var template = function (what) {
