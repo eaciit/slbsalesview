@@ -90,15 +90,15 @@ svc.getSalesVsCollectionData = function () {
                 doGetAugust(function (dataAugust) {
                     var netValueUSDAugust = _.sumBy(dataAugust, 'totalNetValueUSD') || 0
                     var netEstimateRecognizedAugust = _.sumBy(dataAugust, 'totalEstimateDrecognized') || 0
-                    var deltaAugust = netEstimateRecognizedAugust - netValueUSDAugust
+                    var deltaAugust = netValueUSDAugust - netEstimateRecognizedAugust
 
                     var netValueUSDSeptember = _.sumBy(dataSeptember, 'totalNetValueUSD') || 0
                     var netEstimateRecognizedSeptember = _.sumBy(dataSeptember, 'totalEstimateDrecognized') || 0
-                    var deltaSeptember = netEstimateRecognizedSeptember - netValueUSDSeptember
+                    var deltaSeptember = netValueUSDSeptember - netEstimateRecognizedSeptember
 
                     var netValueUSDOctober = _.sumBy(dataOctober, 'totalNetValueUSD') || 0
                     var netEstimateRecognizedOctober = _.sumBy(dataOctober, 'totalEstimateDrecognized') || 0
-                    var deltaOctober = netEstimateRecognizedOctober - netValueUSDOctober
+                    var deltaOctober = netValueUSDOctober - netEstimateRecognizedOctober
 
                     var data = [{
                         month: 'Aug-17',

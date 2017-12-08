@@ -352,10 +352,10 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                 field: 'forecast',
                 color: '#e74c3c'
             }, {
-                name: 'Oct Forecast based on Avg Sales',
+                name: 'Oct Forecast basis average fill %',
                 field: 'octoberForecastBasedOnAvgSales',
                 color: '#27ae60',
-                dashType: 'dash'
+                dashType: 'dash',
             }, {
                 name: 'Oct Actual proj on Delivery Date',
                 field: 'octoberActualBasedOnDeliveryDate',
@@ -364,46 +364,75 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             }, {
                 name: 'Sept Actual',
                 field: 'actualSeptember',
-                color: '#9b59b6'
+                color: '#9b59b6',
             }, {
                 name: 'Aug Actual',
                 field: 'actualAugust',
-                color: '#f1c40f'
+                color: '#f1c40f',
             }]
 
+            var cumulativeSeptember = _.last(data.map(function (d) {
+                return d.actualSeptember
+            }).filter(function (d) {
+                return d != null
+            }))
+
+            var cumulativeAugust = _.last(data.map(function (d) {
+                return d.actualAugust
+            }).filter(function (d) {
+                return d != null
+            }))
+
+            var cumulativeForecast = _.last(data.map(function (d) {
+                return d.forecast
+            }).filter(function (d) {
+                return d != null
+            }))
+
             data.forEach(function (d, i) {
-                var values = [d.actualSeptember, d.actualAugust]
-                if (values.indexOf(null) > -1) {
-                    values = values.filter(function (d) {
-                        return d != null
-                    })
+                var avg = 0
+
+                if (d.actualSeptember != null && d.actualAugust != null) {
+                    avg = _.sum([
+                        d.actualSeptember / cumulativeSeptember, 
+                        d.actualAugust / cumulativeAugust
+                    ]) / 2
+                } else if (d.actualSeptember != null) {
+                    avg = d.actualSeptember / cumulativeSeptember
+                } else if (d.actualAugust != null) {
+                    avg = d.actualAugust / cumulativeAugust
                 }
 
-                d.octoberForecastBasedOnAvgSales = _.sumBy(values) / values.length
+                d.octoberForecastBasedOnAvgSales = avg * cumulativeForecast
             })
+
+            // console.log('cumulativeSeptember', cumulativeSeptember)
+            // console.log('cumulativeAugust', cumulativeAugust)
+            // console.log('cumulativeAugust', cumulativeForecast)
+            // console.table(data)
         } else if (dsa.monthMode() == 'september') {
             series = [{
                 name: 'Sept Forecast',
                 field: 'forecast',
-                color: '#e74c3c'
+                color: '#e74c3c',
             }, {
                 name: 'Sept Actual',
                 field: 'actualSeptember',
-                color: '#9b59b6'
+                color: '#9b59b6',
             }, {
                 name: 'Aug Actual',
                 field: 'actualAugust',
-                color: '#f1c40f'
+                color: '#f1c40f',
             }]
         } else if (dsa.monthMode() == 'august') {
             series = [{
                 name: 'Aug Forecast',
                 field: 'forecast',
-                color: '#e74c3c'
+                color: '#e74c3c',
             }, {
                 name: 'Aug Actual',
                 field: 'actualAugust',
-                color: '#f1c40f'
+                color: '#f1c40f',
             }]
         }
 
@@ -454,10 +483,6 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             tooltip: {
                 visible: true,
                 template: function (d) {
-                    if (d.series.field == 'octoberActualBasedOnDeliveryDate') {
-                        return d.series.name + ' : ' + '$' + kendo.toString(d.value, 'N2')
-                    }
-
                     return d.series.name + ' : ' + '$' + kendo.toString(d.value / 1000000, 'N2') + ' M'
                 }
             }
