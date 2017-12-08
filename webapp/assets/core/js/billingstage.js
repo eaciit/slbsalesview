@@ -103,41 +103,48 @@ bs.monthMode.subscribe(function (newValue) {
 
     switch (newValue) {
         case 'october': 
-            bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
-            bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
-
             if (bs.contentMode() == 'tab1') {
+                bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
+                bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
                 bs.filterRequiredDeliveryDateStart(moment('2017-10-01').toDate())
                 bs.filterRequiredDeliveryDateFinish(moment('2017-10-31').toDate())
             } else {
+                bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT', 'Forecast'])
+                bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected', 'Forecast'])
                 bs.filterRequiredDeliveryDateStart(moment('2017-07-26').toDate())
                 bs.filterRequiredDeliveryDateFinish(moment('2017-09-20').toDate())
             }
         break
         case 'september': 
-            bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
-            bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
-
             if (bs.contentMode() == 'tab1') {
+                bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
+                bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
                 bs.filterRequiredDeliveryDateStart(moment('2017-09-01').toDate())
                 bs.filterRequiredDeliveryDateFinish(moment('2017-09-30').toDate())
             } else {
+                bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT', 'Forecast'])
+                bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected', 'Forecast'])
                 bs.filterRequiredDeliveryDateStart(moment('2017-07-26').toDate())
                 bs.filterRequiredDeliveryDateFinish(moment('2017-09-20').toDate())
             }
         break
         case 'august': 
-            bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
-            bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
-
             if (bs.contentMode() == 'tab1') {
+                bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT'])
+                bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected'])
                 bs.filterRequiredDeliveryDateStart(moment('2017-07-26').toDate())
                 bs.filterRequiredDeliveryDateFinish(moment('2017-08-31').toDate())
                 bs.filterSalesOrderDateStart(moment('2017-07-30').toDate())
                 bs.filterSalesOrderDateFinish(moment('2017-08-31').toDate())
             } else {
+                bs.filterSalesOrderTypeSelected(['ZFBL', 'ZFDP', 'ZSOR', 'ZSPT', 'Forecast'])
+                bs.filterRejectionStatusSelected(['Nothing Rejected', 'Partially Rejected', 'Forecast'])
                 bs.filterRequiredDeliveryDateStart(moment('2017-07-26').toDate())
-                bs.filterRequiredDeliveryDateFinish(moment('2017-09-31').toDate())
+                bs.filterRequiredDeliveryDateFinish(moment('2017-10-01').toDate())
+                bs.filterSalesOrderDateStart(moment('2017-07-30').toDate())
+                bs.filterSalesOrderDateFinish(moment('2017-08-31').toDate())
+                // bs.filterRequiredDeliveryDateStart(moment('2017-07-30').toDate())
+                // bs.filterRequiredDeliveryDateFinish(moment('2017-10-01').toDate())
             }
         break
     }
@@ -171,9 +178,15 @@ bs.loadDataGrid = function () {
 bs.renderGrid = function (data) {
     var total = function (what) {
         return function (d) { 
-            return '<div class="align-right">$' + kendo.toString(d[what].sum, 'N2') + "</div>"
+            return '<div class="align-right">$' + kendo.toString(d[what].sum, 'N0') + "</div>"
         }
     }
+    var template = function (what) {
+        return function (d) {
+            return '$' + kendo.toString(d[what] || 0, 'N0')
+        }
+    }
+
     var columns = [{
         field: '_id',
         title: 'Row Labels',
@@ -181,72 +194,72 @@ bs.renderGrid = function (data) {
     }, {
         field: 'totalIncomplete',
         title: 'a. Incomplete',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalIncomplete'),
         footerTemplate: total('totalIncomplete')
     }, {
         field: 'totalRequiresOpsApproval',
         headerTemplate: 'b. Requires Ops Approval',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalRequiresOpsApproval'),
         footerTemplate: total('totalRequiresOpsApproval')
     }, {
         field: 'totalZSPTNoDelivery',
         headerTemplate: 'c. ZSPT No Delivery',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalZSPTNoDelivery'),
         footerTemplate: total('totalZSPTNoDelivery')
     }, {
         field: 'totalZSPTDelNotShipped',
         headerTemplate: 'd. ZSPT Del Not Shipped',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalZSPTDelNotShipped'),
         footerTemplate: total('totalZSPTDelNotShipped')
     }, {
         field: 'totalPendingRevenueRecognition',
         headerTemplate: 'e. Pending Revenue Recognition',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalPendingRevenueRecognition'),
         footerTemplate: total('totalPendingRevenueRecognition')
     }, {
         field: 'totalEstimateDrecognized',
         headerTemplate: 'f. Estimated Recognized',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalEstimateDrecognized'),
         footerTemplate: total('totalEstimateDrecognized')
     }, {
         field: 'totalNetValueUSD',
         headerTemplate: 'Sum of Net Value (USD)',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalNetValueUSD'),
         footerTemplate: total('totalNetValueUSD')
     }, {
         field: 'totalProratedForecast',
         headerTemplate: 'Sum of Prorated Forecast',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalProratedForecast'),
         footerTemplate: total('totalProratedForecast')
     }, {
         field: 'totalCreditBlock',
         title: 'g. Credit Block',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalCreditBlock'),
         footerTemplate: total('totalCreditBlock')
     }, {
         field: 'totalInvoiced',
         title: 'Sum of Invoiced',
-        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
+        template: template('totalInvoiced'),
         footerTemplate: total('totalInvoiced')
     }]
 
@@ -254,9 +267,9 @@ bs.renderGrid = function (data) {
         columns.push({
             field: 'totalPendingInvoice',
             title: 'Sum of Pending Invoice - Waiting on Supporting Documents',
-            format: '${0:N0}',
             attributes: { class: 'align-right' },
             aggregates: ["sum"], 
+            template: template('totalPendingInvoice'),
             footerTemplate: total('totalPendingInvoice')
         })
     }

@@ -222,7 +222,6 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) 
 	for i, each := range resultAggrGrid {
 		for _, eachForecast := range resultAggrForecast {
 			if each.GetString("_id") == eachForecast.GetString("_id") {
-				tk.Println("----------", each.GetString("_id"), eachForecast.GetString("_id"), eachForecast.GetFloat64("forecast"))
 				resultAggrGrid[i].Set("totalProratedForecast", eachForecast.GetFloat64("forecast"))
 			}
 		}
