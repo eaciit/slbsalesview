@@ -34,7 +34,7 @@ func (c *BillingStageController) GetDataGrid(k *knot.WebContext) interface{} {
 		return c.SetResultError(err.Error(), nil)
 	}
 
-	dataAggrGrid, _, err := models.GetDataGridBillingStage(payload.DailySalesAnalysisPayload)
+	data, err := models.GetDataGridBillingStage(payload.DailySalesAnalysisPayload)
 	if err != nil {
 		return c.SetResultError(err.Error(), nil)
 	}
@@ -51,11 +51,7 @@ func (c *BillingStageController) GetDataGrid(k *knot.WebContext) interface{} {
 	// 	}
 	// }
 
-	return c.SetResultOK(struct {
-		GridData interface{}
-	}{
-		dataAggrGrid,
-	})
+	return c.SetResultOK(data)
 
 	return nil
 }

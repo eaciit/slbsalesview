@@ -161,7 +161,7 @@ bs.loadDataGrid = function () {
                 return
             }
 
-            resolve(res.Data.GridData)
+            resolve(res.Data)
         }, function (res) {
             reject(xhr.responseText)
         })
@@ -228,11 +228,12 @@ bs.renderGrid = function (data) {
         aggregates: ["sum"], 
         footerTemplate: total('totalNetValueUSD')
     }, {
+        field: 'totalProratedForecast',
         headerTemplate: 'Sum of Prorated Forecast',
-        format: '$0',
+        format: '${0:N0}',
         attributes: { class: 'align-right' },
         aggregates: ["sum"], 
-        footerTemplate: ''
+        footerTemplate: total('totalProratedForecast')
     }, {
         field: 'totalCreditBlock',
         title: 'g. Credit Block',
@@ -276,6 +277,7 @@ bs.renderGrid = function (data) {
                 { field: 'totalPendingRevenueRecognition', aggregate: 'sum' },
                 { field: 'totalEstimateDrecognized', aggregate: 'sum' },
                 { field: 'totalNetValueUSD', aggregate: 'sum' },
+                { field: 'totalProratedForecast', aggregate: 'sum' },
                 { field: 'totalCreditBlock', aggregate: 'sum' },
                 { field: 'totalInvoiced', aggregate: 'sum' },
                 { field: 'totalPendingInvoice', aggregate: 'sum' },
@@ -290,7 +292,6 @@ bs.renderGrid = function (data) {
     $('.grid').kendoGrid(config)
 }
 
-
 bs.renderChart = function (data) {
     var series = [
         { name: 'a. Incomplete', field: 'totalIncomplete' },
@@ -300,7 +301,7 @@ bs.renderChart = function (data) {
         { name: 'e. Pending Revenue Recognition', field: 'totalPendingRevenueRecognition' },
         { name: 'f. Estimated Recognized', field: 'totalEstimateDrecognized' },
         { name: 'Sum of Net Value (USD)', field: 'totalNetValueUSD' },
-        // { name: 'Sum of Prorated Forecast', field: '' },
+        { name: 'Sum of Prorated Forecast', field: 'totalProratedForecast' },
         { name: 'g. Credit Block', field: 'totalCreditBlock' },
         { name: 'Sum of Invoiced', field: 'totalInvoiced' },
     ]

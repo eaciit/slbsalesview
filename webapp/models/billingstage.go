@@ -90,23 +90,13 @@ func generateGridFilter(payload DailySalesAnalysisPayload) (tk.M, error) {
 	return filter, nil
 }
 
-func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M, error) {
+func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) {
 	filter, err := generateGridFilter(payload)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	// ============== aggr actual data
-
-	// month := ""
-	// switch payload.MonthMode {
-	// case "october":
-	//  month = "October"
-	// case "september":
-	//  month = "September"
-	// case "august":
-	//  month = "August"
-	// }
+	// ============== actual data
 
 	pipeAggrGrid := []tk.M{}
 	if len(filter) > 0 {
@@ -163,14 +153,80 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, []tk.M,
 		defer csrAggrActual.Close()
 	}
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	resultAggrGrid := make([]tk.M, 0)
 	err = csrAggrActual.Fetch(&resultAggrGrid, 0, false)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return resultAggrGrid, nil, nil
+	// =============== forecast data
+
+	month := ""
+	switch payload.MonthMode {
+	case "october":
+		// month = "October"
+		month = "September"
+	case "september":
+		month = "September"
+	case "august":
+		month = "August"
+	}
+
+	pipeAggrForecast := make([]tk.M, 0)
+	pipeAggrForecast = append(pipeAggrForecast, tk.M{
+		"$project": tk.M{
+			"forecastmonth":  1,
+			"subgeomarket":   1,
+			"subproductline": 1,
+			"salesordertype": 1,
+			"forecast":       1,
+		},
+	}, tk.M{
+		"$match": tk.M{
+			"salesordertype": "Forecast",
+			"forecastmonth":  month,
+		},
+	}, tk.M{
+		"$group": tk.M{
+			"_id": "$subgeomarket",
+			"forecast": tk.M{
+				"$sum": "$forecast",
+			},
+		},
+	})
+
+	tk.Println("pipeAggrForecast", tk.JsonString(pipeAggrForecast))
+
+	csrAggrForecast, err := Conn.NewQuery().
+		Command("pipe", pipeAggrForecast).
+		From(NewMainHeaderModel().TableName()).
+		Cursor(nil)
+	if csrAggrForecast != nil {
+		defer csrAggrForecast.Close()
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	resultAggrForecast := make([]tk.M, 0)
+	err = csrAggrForecast.Fetch(&resultAggrForecast, 0, false)
+	if err != nil {
+		return nil, err
+	}
+
+	// ============= inject
+
+	for i, each := range resultAggrGrid {
+		for _, eachForecast := range resultAggrForecast {
+			if each.GetString("_id") == eachForecast.GetString("_id") {
+				tk.Println("----------", each.GetString("_id"), eachForecast.GetString("_id"), eachForecast.GetFloat64("forecast"))
+				resultAggrGrid[i].Set("totalProratedForecast", eachForecast.GetFloat64("forecast"))
+			}
+		}
+	}
+
+	return resultAggrGrid, nil
 }
