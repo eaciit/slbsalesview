@@ -170,7 +170,8 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) 
 	month := ""
 	switch payload.MonthMode {
 	case "october":
-		month = "October"
+		// month = "October"
+		month = "September"
 	case "september":
 		month = "September"
 	case "august":
