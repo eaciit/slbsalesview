@@ -344,21 +344,13 @@ dsa.renderChartDailySalesAnalysis = function (data) {
         var series = []
         if (dsa.monthMode() == 'october') {
             series = [{
-                name: 'Oct Forecast',
-                field: 'forecast',
-                color: '#e74c3c'
-            }, {
-                name: 'Sept Actual',
-                field: 'actualSeptember',
-                color: '#9b59b6'
-            }, {
-                name: 'Aug Actual',
-                field: 'actualAugust',
-                color: '#f1c40f'
-            }, {
                 name: 'Oct Actual',
                 field: 'actualOctober',
                 color: '#3498db'
+            }, {
+                name: 'Oct Forecast',
+                field: 'forecast',
+                color: '#e74c3c'
             }, {
                 name: 'Oct Forecast based on Avg Sales',
                 field: 'octoberForecastBasedOnAvgSales',
@@ -369,6 +361,14 @@ dsa.renderChartDailySalesAnalysis = function (data) {
                 field: 'octoberActualBasedOnDeliveryDate',
                 color: '#2c3e50',
                 dashType: 'dash'
+            }, {
+                name: 'Sept Actual',
+                field: 'actualSeptember',
+                color: '#9b59b6'
+            }, {
+                name: 'Aug Actual',
+                field: 'actualAugust',
+                color: '#f1c40f'
             }]
 
             data.forEach(function (d, i) {

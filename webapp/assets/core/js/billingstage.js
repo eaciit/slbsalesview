@@ -330,6 +330,10 @@ bs.renderChart = function (data) {
         })
     }
 
+    var dataSorted = _.orderBy(data, function (d) {
+        return parseInt(d._id.replace('GEO', ''), 10)
+    })
+
     var config = {
         chartArea: {
             background: 'transparent',
@@ -338,7 +342,7 @@ bs.renderChart = function (data) {
             }
         },
         dataSource: {
-            data: data
+            data: dataSorted
         },
         seriesDefaults: {
             type: "column",
@@ -350,8 +354,7 @@ bs.renderChart = function (data) {
             field: '_id',
             labels: {
                 margin: {
-                    top: 10,
-                    left: -100
+                    top: 10
                 }
             },
             justified: true,

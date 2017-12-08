@@ -7,18 +7,16 @@
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
-        <!-- <ul class="nav navbar-nav"></ul> -->
-
-        <ul class="nav navbar-nav navbar-right">
-            {{UnescapeHTML "<!-- ko foreach: dataNavigationMenuTree -->"}}
+        <ul class="nav navbar-nav" data-bind="foreach: dataNavigationMenuTree">
             <li>
                 <a data-bind="attr: { title: Title, href: Url }, css: { 'active': (window.location.pathname == Url) }">
                     <i class="fa" data-bind="attr: { class: 'fa fa-' + Icon }"></i>
                     &nbsp; <span data-bind="text: Title">&nbsp;</span>
                 </a>
             </li>
-            {{UnescapeHTML "<!-- /ko -->"}}
+        </ul>
 
+        <ul class="nav navbar-nav navbar-right">
             <li class="dropdown" style="margin-left: 10px;">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-lg fa-gear"></i>
