@@ -107,7 +107,7 @@ svc.getSalesVsCollectionData = function () {
                         delta: deltaAugust,
                         deltaCumulative: deltaAugust
                     }, {
-                        month: 'Sept-17',
+                        month: 'Sep-17',
                         totalNetValueUSD: netValueUSDSeptember,
                         totalEstimateDrecognized: netEstimateRecognizedSeptember,
                         delta: deltaSeptember,
