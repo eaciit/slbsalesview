@@ -746,8 +746,6 @@ dsa.constructDataChartDailySalesInsights = function (monthMode, data) {
             return Math.abs(d.difference)
         }).difference)
 
-        // console.log('flatDataSorted', flatDataSorted)
-
         resolve({
             rows: flatDataSorted,
             max: max
@@ -757,6 +755,7 @@ dsa.constructDataChartDailySalesInsights = function (monthMode, data) {
 
 dsa.renderChartDailySalesInsights = function (data) {
     return new Promise(function (resolve, reject) {
+        var max = Math.pow(10, String(parseInt(data.max, 10)).length - 1) * (parseInt(String(parseInt(data.max, 10))[0], 10) + 1)
 
         var config = {
             chartArea: {
@@ -794,6 +793,7 @@ dsa.renderChartDailySalesInsights = function (data) {
                 }
             },
             valueAxis: {
+                majorUnit: max / 2,
                 labels: {
                     font: '10px Arial, Helvetica, sans-serif',
                     template: function (d) {
@@ -811,8 +811,8 @@ dsa.renderChartDailySalesInsights = function (data) {
                 line: {
                     visible: false
                 },
-                max: data.max,
-                min: data.max * -1
+                max: max,
+                min: max * -1
             },
             legend: {
                 visible: false
