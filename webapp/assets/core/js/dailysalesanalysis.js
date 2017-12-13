@@ -797,7 +797,9 @@ dsa.renderChartDailySalesInsights = function (data) {
                 labels: {
                     font: '10px Arial, Helvetica, sans-serif',
                     template: function (d) {
-                        var text = kendo.toString(d.value / 1000000, 'n0') + 'M'
+                        var isNegative = d.value < 0
+                        var valueCeiled = Math.ceil(Math.abs(d.value) / 1000000) * (isNegative ? -1 : 1)
+                        var text = kendo.toString(valueCeiled, 'n0') + 'M'
                         // if (text.indexOf('-') > -1) {
                         //     return text
                         // }
