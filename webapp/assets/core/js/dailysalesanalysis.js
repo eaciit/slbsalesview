@@ -368,7 +368,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             }, {
                 name: 'Aug Actual',
                 field: 'actualAugust',
-                color: '#27ae60',
+                color: '#1b924d',
             }]
 
             var cumulativeSeptember = _.last(data.map(function (d) {
@@ -422,7 +422,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             }, {
                 name: 'Aug Actual',
                 field: 'actualAugust',
-                color: '#27ae60',
+                color: '#1b924d',
             }]
         } else if (dsa.monthMode() == 'august') {
             series = [{
@@ -432,7 +432,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             }, {
                 name: 'Aug Actual',
                 field: 'actualAugust',
-                color: '#27ae60',
+                color: '#1b924d',
             }]
         }
 
