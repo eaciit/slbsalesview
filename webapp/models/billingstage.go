@@ -142,7 +142,7 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) 
 	})
 	pipeAggrGrid = append(pipeAggrGrid, tk.M{
 		"$match": tk.M{
-			"_id": tk.M{"$ne": 0, "$nin": []string{"GEO12", "GEO13"}},
+			"_id": tk.M{"$ne": 0},
 		},
 	})
 
@@ -199,10 +199,6 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) 
 				"$sum": "$forecast",
 			},
 		},
-	}, tk.M{
-		"$match": tk.M{
-			"_id": tk.M{"$nin": []string{"GEO12", "GEO13"}},
-		},
 	})
 
 	tk.Println("pipeAggrForecast", tk.JsonString(pipeAggrForecast))
@@ -249,13 +245,21 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) 
 
 	// ============= inject
 
+	exclusions := []string{"GEO12", "GEO13"}
+	result := make([]tk.M, 0)
 	for i, each := range resultAggrGrid {
+		if tk.HasMember(exclusions, each.GetString("_id")) {
+			continue
+		}
+
 		for _, eachForecast := range resultAggrForecast {
 			if each.GetString("_id") == eachForecast.GetString("_id") {
 				resultAggrGrid[i].Set("totalProratedForecast", eachForecast.GetFloat64("forecast"))
 			}
 		}
+
+		result = append(result, each)
 	}
 
-	return resultAggrGrid, nil
+	return result, nil
 }
