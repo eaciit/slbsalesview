@@ -350,11 +350,11 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             }, {
                 name: 'Oct Straight Line Forecast',
                 field: 'forecast',
-                color: '#e74c3c'
+                color: '#f39c12' // '#e74c3c'
             }, {
                 name: 'Oct Curved Forecast',
                 field: 'octoberForecastBasedOnAvgSales',
-                color: '#27ae60',
+                color: '#44e88a',
                 dashType: 'dash',
             }, {
                 name: 'Predicted Oct based on Daily View',
@@ -414,7 +414,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             series = [{
                 name: 'Sep Forecast',
                 field: 'forecast',
-                color: '#e74c3c',
+                color: '#f39c12',
             }, {
                 name: 'Sep Actual',
                 field: 'actualSeptember',
@@ -428,7 +428,7 @@ dsa.renderChartDailySalesAnalysis = function (data) {
             series = [{
                 name: 'Aug Forecast',
                 field: 'forecast',
-                color: '#e74c3c',
+                color: '#f39c12',
             }, {
                 name: 'Aug Actual',
                 field: 'actualAugust',
@@ -591,7 +591,7 @@ dsa.loadDataChartDailySalesInsights = function () {
                                     d.difference = d.nextValue - d.prevValue
                                 })
                                 data1Constructed.rows = _.orderBy(data1Constructed.rows, 'difference', 'desc')
-
+console.log('data1Constructed.rows', data1Constructed.rows)
                                 data1Constructed.max = _.maxBy([
                                     _.maxBy(data1Constructed.rows, 'difference').difference,
                                     Math.abs(_.minBy(data1Constructed.rows, 'difference').difference),
@@ -772,10 +772,12 @@ dsa.renderChartDailySalesInsights = function (data) {
                 type: "bar",
                 style: "smooth"
             },
-            seriesColors: ['#3498db', '#9b59b6'],
             series: [{
                 name: 'Difference',
                 field: 'difference',
+                color: function (d) {
+                    return (d.value < 0) ? '#e74c3c' : '#27ae60'
+                },
             }],
             categoryAxis: {
                 axisCrossingValues: [0],

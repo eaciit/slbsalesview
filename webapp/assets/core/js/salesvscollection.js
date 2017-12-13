@@ -140,11 +140,11 @@ svc.renderChartSalesVsCollection = function (data) {
         series: [{
             field: 'totalEstimateDrecognized',
             name: 'Revenue Recognized',
-            color: '#3498db'
+            color: '#2980b9'
         }, {
             field: 'totalNetValueUSD',
             name: 'Billed',
-            color: '#e74c3c'
+            color: '#7ccaff'
         }, {
             field: 'delta',
             name: 'Delta',
