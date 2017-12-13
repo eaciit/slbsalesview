@@ -142,7 +142,7 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) 
 	})
 	pipeAggrGrid = append(pipeAggrGrid, tk.M{
 		"$match": tk.M{
-			"_id": tk.M{"$ne": 0},
+			"_id": tk.M{"$ne": 0, "$nin": []string{"GEO12", "GEO13"}},
 		},
 	})
 
@@ -198,6 +198,10 @@ func GetDataGridBillingStage(payload DailySalesAnalysisPayload) ([]tk.M, error) 
 			"forecast": tk.M{
 				"$sum": "$forecast",
 			},
+		},
+	}, tk.M{
+		"$match": tk.M{
+			"_id": tk.M{"$nin": []string{"GEO12", "GEO13"}},
 		},
 	})
 
